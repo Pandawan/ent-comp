@@ -1,25 +1,29 @@
 {
   "name": "ent-comp",
-  "version": "0.9.1",
-  "description": "A light, fast Entity Component System in JS",
-  "main": "src/ECS.js",
+  "version": "0.10.0",
+  "description": "A light, fast Entity Component System in TS",
+  "main": "dist/ECS.js",
+  "types": "dist/ECS.d.ts",
   "files": [
-    "/src"
+    "/dist"
   ],
   "scripts": {
+    "build": "tsc",
     "test": "tape test/*.js",
     "bench": "node bench/suite.js",
-    "liveBench": "(cd bench; webpack-dev-server)",
-    "doc": "jsdoc2md src/* --partial doc-templates/*  > api.md"
+    "liveBench": "(cd bench; webpack-dev-server)"
   },
   "keywords": [
     "ECS",
-    "js",
+    "ts",
     "Entity",
     "Control",
     "System"
   ],
-  "author": "Andy Hall",
+  "authors": [
+    "Andy Hall",
+    "Pandawan"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -27,8 +31,8 @@
   },
   "devDependencies": {
     "fen-bench": "^0.1.0",
-    "jsdoc-to-markdown": "^5.0.0",
-    "tape": "^4.4.0"
+    "tape": "^4.4.0",
+    "typescript": "^3.5.3"
   },
   "dependencies": {}
 }
