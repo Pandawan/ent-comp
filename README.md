@@ -1,6 +1,6 @@
 # ent-comp
 
-A light, *fast* entity-component system in Javascript, with no dependencies.
+A light, *fast* entity-component system in TypeScript, with no dependencies.
 
 ## Overview
 
@@ -14,7 +14,7 @@ removing what wasn't useful, and rejiggering what remained to perform well in th
 most important cases. Specifically it's tuned to be fast at accessing the state 
 of a given entity/component, and looping over all states for a given component. 
 
-To get started, check the usage examples below, or the [API reference](api.md).
+To get started, check the usage examples below, or the [API reference](docs).
 
 ## Installation:
 
@@ -35,7 +35,7 @@ npm run doc      # rebuild API docs
 
 ## API reference:
 
-See [api.md](api.md).
+See [docs](docs).
 
 
 ## Basic usage:
@@ -151,7 +151,7 @@ ecs.tick( tick_time )
 ecs.render( render_time )
 ```
 
-See the [API reference](api.md) for details on each method.
+See the [API reference](docs) for details on each method.
 
 ## Note on deferred removals
 

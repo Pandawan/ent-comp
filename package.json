@@ -11,7 +11,8 @@
     "build": "tsc",
     "test": "tape test/*.js",
     "bench": "node bench/suite.js",
-    "liveBench": "(cd bench; webpack-dev-server)"
+    "liveBench": "(cd bench; webpack-dev-server)",
+    "doc": "typedoc src --out docs --theme markdown --readme none --mode file --excludeNotExported"
   },
   "keywords": [
     "ECS",
@@ -32,6 +33,8 @@
   "devDependencies": {
     "fen-bench": "^0.1.0",
     "tape": "^4.4.0",
+    "typedoc": "^0.15.0",
+    "typedoc-plugin-markdown": "^2.1.3",
     "typescript": "^3.5.3"
   },
   "dependencies": {}
