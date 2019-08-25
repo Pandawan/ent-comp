@@ -35,6 +35,15 @@ export interface Component {
   onRemove?: (id: number, state: StateWithID) => void;
 
   /**
+   * Use this for any external events that need to be sent to the component.
+   * (This is never called by ent-comp).
+   * @param event The name of the event.
+   * @param id The entity's ID.
+   * @param state The component's current state.
+   */
+  onExternalEvent?: (event: string, id: number, state: StateWithID | StateWithID[]) => any;
+
+  /**
    * Called every tick to process that component.
    * @param dt Length of one tick in ms.
    * @param states Array of all states of this component type.
@@ -66,7 +75,7 @@ export interface StateWithID {
  * @param entID The id of the entity to get from.
  * @returns The state of that entity's component.
  */
-export type StateAccessor = (entID: number) => StateWithID | StateWithID[] | undefined;
+export type StateAccessor = ((entID: number) => StateWithID | StateWithID[] | undefined);
 
 /**
  * A `hasComponent`-like accessor function bound to a given component name.
