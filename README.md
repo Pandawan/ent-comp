@@ -245,6 +245,8 @@ ecs.addComponent(id, 'foo', { vector3: [1,1,1] })
 
 ## Change list
 
+* 1.1.0
+  * Remove `multi`-components, they're annoying and not very usefu; just use an array within states :)
 * 1.0.0
   * Rewrite in TypeScript (by Pandawan)
 * 0.9.0

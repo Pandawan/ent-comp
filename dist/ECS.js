@@ -45,7 +45,6 @@ var ECS = /** @class */ (function () {
         this.renderSystems = [];
         this.deferredEntityRemovals = [];
         this.deferredCompRemovals = [];
-        this.deferredMultiCompRemovals = [];
         this.deferralTimeoutPending = false;
         this.uid = 1;
         this.defaultOrder = 99;
@@ -179,8 +178,7 @@ var ECS = /** @class */ (function () {
             onAdd: componentDefinition.onAdd || undefined,
             onRemove: componentDefinition.onRemove || undefined,
             system: componentDefinition.system || undefined,
-            renderSystem: componentDefinition.renderSystem || undefined,
-            multi: !!componentDefinition.multi
+            renderSystem: componentDefinition.renderSystem || undefined
         };
         this.components[name] = internalDef;
         this.storage[name] = new Map();
@@ -275,24 +273,14 @@ var ECS = /** @class */ (function () {
         }
         if (pendingRemoval)
             this.doDeferredComponentRemovals();
-        if (componentData.has(entityId) && !componentDefinition.multi)
+        if (componentData.has(entityId))
             throw new Error("Entity " + entityId + " already has component: " + componentName + ".");
         // Create new component state object for this entity
         var newState = Object.assign({}, { __id: entityId }, componentDefinition.state, state);
         // Just in case passed-in state object had an __id property
         newState.__id = entityId;
-        // Add to dataStore - for multi components, may already be present
-        if (componentDefinition.multi) {
-            var statesArr = componentData.get(entityId);
-            if (!statesArr) {
-                statesArr = [];
-                componentData.set(entityId, statesArr);
-            }
-            statesArr.push(newState);
-        }
-        else {
-            componentData.set(entityId, newState);
-        }
+        // Add to dataStore
+        componentData.set(entityId, newState);
         // Call handler and return
         if (componentDefinition.onAdd)
             componentDefinition.onAdd(entityId, newState);
@@ -351,16 +339,12 @@ var ECS = /** @class */ (function () {
      */
     ECS.prototype.removeComponent = function (entityId, componentName, immediately) {
         if (immediately === void 0) { immediately = false; }
-        var componentDefinition = this.components[componentName];
         var componentData = this.storage[componentName];
         if (!componentData)
             throw new Error("Unknown component: " + componentName + ".");
-        // If component isn't present, fail silently for multi or throw otherwise
+        // If component isn't present, throw 
         if (!componentData.has(entityId)) {
-            if (componentDefinition.multi)
-                return this;
-            else
-                throw new Error("Entity " + entityId + " does not have component: " + componentName + " to remove.");
+            throw new Error("Entity " + entityId + " does not have component: " + componentName + " to remove.");
         }
         // Defer or remove
         if (immediately) {
@@ -381,112 +365,19 @@ var ECS = /** @class */ (function () {
      * @param componentName The name of the component to remove.
      */
     ECS.prototype.removeComponentNow = function (entityId, componentName) {
-        var e_5, _a;
         var componentDefinition = this.components[componentName];
         var componentData = this.storage[componentName];
         if (!componentData)
             return;
         if (!componentData.has(entityId))
             return; // probably got removed twice during deferral
-        // Call onRemove handler - on each instance for multi components
+        // Call onRemove handler
         var states = componentData.get(entityId);
-        if (componentDefinition.onRemove && states) {
-            if (componentDefinition.multi && Array.isArray(states)) {
-                try {
-                    for (var states_1 = __values(states), states_1_1 = states_1.next(); !states_1_1.done; states_1_1 = states_1.next()) {
-                        var state = states_1_1.value;
-                        componentDefinition.onRemove(entityId, state);
-                    }
-                }
-                catch (e_5_1) { e_5 = { error: e_5_1 }; }
-                finally {
-                    try {
-                        if (states_1_1 && !states_1_1.done && (_a = states_1.return)) _a.call(states_1);
-                    }
-                    finally { if (e_5) throw e_5.error; }
-                }
-            }
-            else {
-                if (Array.isArray(states))
-                    throw new Error("Found multiple states on non-multi component: " + componentName);
-                componentDefinition.onRemove(entityId, states);
-            }
+        if (states && componentDefinition.onRemove) {
+            componentDefinition.onRemove(entityId, states);
         }
-        // If multi, kill the states array to hopefully free the objects
-        if (componentDefinition.multi && Array.isArray(states))
-            states.length = 0;
         // Actual removal from data store
         componentData.delete(entityId);
-    };
-    /**
-     * Removes a particular state instance of a multi-component.
-     * Pass a final truthy argument to make this happen synchronously - but be careful,
-     * that will splice an element out of the multi-component array,
-     * changing the indexes of subsequent elements.
-     * @param entityId The id of the entity to remove from.
-     * @param componentName The name of the component to remove.
-     * @param index The index of the state to remove (since multi-component).
-     * @param immediately Force immediate removal (instead of deferred).
-     *
-     * @example
-     * ```js
-     * ecs.getState(id, 'foo')   // [ state1, state2, state3 ]
-     * ecs.removeMultiComponent(id, 'foo', 1, true)  // true means: immediately
-     * ecs.getState(id, 'foo')   // [ state1, state3 ]
-     * ```
-     */
-    ECS.prototype.removeMultiComponent = function (entityId, componentName, index, immediately) {
-        if (immediately === void 0) { immediately = false; }
-        var componentDefinition = this.components[componentName];
-        var componentData = this.storage[componentName];
-        if (!componentData)
-            throw new Error("Unknown component: " + componentName + ".");
-        if (!componentDefinition.multi)
-            throw new Error('removeMultiComponent called on non-multi component');
-        // throw if comp isn't present, or multicomp isn't present at index
-        var statesArr = componentData.get(entityId);
-        if (!statesArr || !Array.isArray(statesArr) || !statesArr[index]) {
-            throw new Error("Multicomponent " + componentName + " instance not found at index " + index);
-        }
-        // index removals by object, in case indexes change later
-        var stateToRemove = statesArr[index];
-        if (immediately) {
-            this.removeMultiComponentNow(entityId, componentName, stateToRemove);
-        }
-        else {
-            this.deferredMultiCompRemovals.push({
-                id: entityId,
-                compName: componentName,
-                state: stateToRemove
-            });
-        }
-        return this;
-    };
-    /**
-     * Remove one state from a multi-component.
-     * @param entityId The id of the entity to remove from.
-     * @param componentName Then name of the component to remove.
-     * @param stateObject The specific state to remove.
-     */
-    ECS.prototype.removeMultiComponentNow = function (entityId, componentName, stateObject) {
-        var componentDefinition = this.components[componentName];
-        var componentData = this.storage[componentName];
-        if (!componentData)
-            throw new Error("Unknown component: " + componentName + ".");
-        var statesArr = componentData.get(entityId);
-        if (!statesArr)
-            return;
-        var index = statesArr.indexOf(stateObject);
-        if (index < 0)
-            return;
-        if (componentDefinition.onRemove) {
-            componentDefinition.onRemove(entityId, stateObject);
-        }
-        statesArr.splice(index, 1);
-        // if this leaves the states list empty, remove the whole component
-        if (statesArr.length === 0) {
-            this.removeComponentNow(entityId, componentName);
-        }
     };
     // #endregion
     // #region State Management
@@ -614,7 +505,7 @@ var ECS = /** @class */ (function () {
      * ```
      */
     ECS.prototype.tick = function (dt) {
-        var e_6, _a;
+        var e_5, _a;
         this.runAllDeferredRemovals();
         try {
             for (var _b = __values(this.systems), _c = _b.next(); !_c.done; _c = _b.next()) {
@@ -626,12 +517,12 @@ var ECS = /** @class */ (function () {
                 }
             }
         }
-        catch (e_6_1) { e_6 = { error: e_6_1 }; }
+        catch (e_5_1) { e_5 = { error: e_5_1 }; }
         finally {
             try {
                 if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
-            finally { if (e_6) throw e_6.error; }
+            finally { if (e_5) throw e_5.error; }
         }
         this.runAllDeferredRemovals();
         return this;
@@ -658,7 +549,7 @@ var ECS = /** @class */ (function () {
      * ```
      */
     ECS.prototype.render = function (dt) {
-        var e_7, _a;
+        var e_6, _a;
         this.runAllDeferredRemovals();
         try {
             for (var _b = __values(this.renderSystems), _c = _b.next(); !_c.done; _c = _b.next()) {
@@ -670,12 +561,12 @@ var ECS = /** @class */ (function () {
                 }
             }
         }
-        catch (e_7_1) { e_7 = { error: e_7_1 }; }
+        catch (e_6_1) { e_6 = { error: e_6_1 }; }
         finally {
             try {
                 if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
-            finally { if (e_7) throw e_7.error; }
+            finally { if (e_6) throw e_6.error; }
         }
         this.runAllDeferredRemovals();
         return this;
@@ -701,7 +592,6 @@ var ECS = /** @class */ (function () {
      */
     ECS.prototype.runAllDeferredRemovals = function () {
         this.doDeferredComponentRemovals();
-        this.doDeferredMultiComponentRemovals();
         this.doDeferredEntityRemovals();
     };
     /**
@@ -724,17 +614,6 @@ var ECS = /** @class */ (function () {
             if (removalRequest === undefined)
                 continue;
             this.removeComponentNow(removalRequest.id, removalRequest.compName);
-        }
-    };
-    // multi components - queue of { id, compName, state }
-    ECS.prototype.doDeferredMultiComponentRemovals = function () {
-        while (this.deferredMultiCompRemovals.length) {
-            var removalRequest = this.deferredMultiCompRemovals.pop();
-            if (removalRequest === undefined)
-                continue;
-            this.removeMultiComponentNow(removalRequest.id, removalRequest.compName, removalRequest.state);
-            // TODO: Why was this here? Is it trying to delete the actual object?
-            // removalRequest.state = undefined;
         }
     };
     return ECS;

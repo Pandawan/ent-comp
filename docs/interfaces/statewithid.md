@@ -28,6 +28,6 @@ Component state object with an __id referring to the entity that owns it.
 
 • **__id**: *number*
 
-*Defined in [ECS.ts:69](https://github.com/PandawanFr/ent-comp/blob/746c7ac/src/ECS.ts#L69)*
+*Defined in [ECS.ts:65](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L65)*
 
 The id of the entity this state refers to

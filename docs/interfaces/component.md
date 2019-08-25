@@ -14,7 +14,6 @@ Component Definition
 
 ### Properties
 
-* [multi](component.md#optional-multi)
 * [name](component.md#name)
 * [onAdd](component.md#optional-onadd)
 * [onExternalEvent](component.md#optional-onexternalevent)
@@ -26,21 +25,11 @@ Component Definition
 
 ## Properties
 
-### `Optional` multi
-
-• **multi**? : *undefined | false | true*
-
-*Defined in [ECS.ts:18](https://github.com/PandawanFr/ent-comp/blob/746c7ac/src/ECS.ts#L18)*
-
-Whether or not an entity can have multiple instances of this component at once
-
-___
-
 ###  name
 
 • **name**: *string*
 
-*Defined in [ECS.ts:10](https://github.com/PandawanFr/ent-comp/blob/746c7ac/src/ECS.ts#L10)*
+*Defined in [ECS.ts:10](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L10)*
 
 Name of the component
 
@@ -50,7 +39,7 @@ ___
 
 • **onAdd**? : *undefined | function*
 
-*Defined in [ECS.ts:28](https://github.com/PandawanFr/ent-comp/blob/746c7ac/src/ECS.ts#L28)*
+*Defined in [ECS.ts:24](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L24)*
 
 Called when the component is added to an entity.
 
@@ -64,7 +53,7 @@ ___
 
 • **onExternalEvent**? : *undefined | function*
 
-*Defined in [ECS.ts:44](https://github.com/PandawanFr/ent-comp/blob/746c7ac/src/ECS.ts#L44)*
+*Defined in [ECS.ts:40](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L40)*
 
 Use this for any external events that need to be sent to the component.
 (This is never called by ent-comp).
@@ -81,7 +70,7 @@ ___
 
 • **onRemove**? : *undefined | function*
 
-*Defined in [ECS.ts:35](https://github.com/PandawanFr/ent-comp/blob/746c7ac/src/ECS.ts#L35)*
+*Defined in [ECS.ts:31](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L31)*
 
 Called when the component is removed from an entity.
 
@@ -95,7 +84,7 @@ ___
 
 • **order**? : *undefined | number*
 
-*Defined in [ECS.ts:14](https://github.com/PandawanFr/ent-comp/blob/746c7ac/src/ECS.ts#L14)*
+*Defined in [ECS.ts:14](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L14)*
 
 Order to execute the components in
 
@@ -105,7 +94,7 @@ ___
 
 • **renderSystem**? : *undefined | function*
 
-*Defined in [ECS.ts:58](https://github.com/PandawanFr/ent-comp/blob/746c7ac/src/ECS.ts#L58)*
+*Defined in [ECS.ts:54](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L54)*
 
 Called every tick to render that component.
 
@@ -119,7 +108,7 @@ ___
 
 • **state**? : *any*
 
-*Defined in [ECS.ts:22](https://github.com/PandawanFr/ent-comp/blob/746c7ac/src/ECS.ts#L22)*
+*Defined in [ECS.ts:18](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L18)*
 
 Default state of the component
 
@@ -129,7 +118,7 @@ ___
 
 • **system**? : *undefined | function*
 
-*Defined in [ECS.ts:51](https://github.com/PandawanFr/ent-comp/blob/746c7ac/src/ECS.ts#L51)*
+*Defined in [ECS.ts:47](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L47)*
 
 Called every tick to process that component.
 
