@@ -122,8 +122,9 @@ export default class ECS {
      * Constructor for a new entity-component-system manager.
      * @example
      * ```js
-     * var ECS = require('ent-comp')
-     * var ecs = new ECS()
+     * // You might have to import the file directly rather than ent-comp
+     * import EntComp from 'ent-comp';
+     * const ecs = new EntComp();
      * ```
      */
     constructor();
@@ -208,7 +209,7 @@ export default class ECS {
      * ecs.getState(id, 'foo').val // 20
      * ```
      */
-    addComponent(entityId: number, componentName: string, state?: StateWithID): ECS;
+    addComponent(entityId: number, componentName: string, state?: any): ECS;
     /**
      * Checks if an entity has a component.
      *
@@ -222,6 +223,17 @@ export default class ECS {
      * ```
      */
     hasComponent(entityId: number, componentName: string): boolean;
+    /**
+     * Get all of the components attached to the given entity.
+     * @param entityId The entity to get a list of components from.
+     *
+     * @example
+     * ```js
+     * ecs.addComponent(id, 'comp-name')
+     * ecs.getAllComponents(id) // ['comp-name']
+     * ```
+     */
+    getAllComponents(entityId: number): string[];
     /**
      * Removes a component from an entity, deleting any state data.
      * @param entityId The id of the entity to remove from.

@@ -11,8 +11,9 @@ class ECS {
      * Constructor for a new entity-component-system manager.
      * @example
      * ```js
-     * var ECS = require('ent-comp')
-     * var ecs = new ECS()
+     * // You might have to import the file directly rather than ent-comp
+     * import EntComp from 'ent-comp';
+     * const ecs = new EntComp();
      * ```
      */
     constructor() {
@@ -211,7 +212,6 @@ class ECS {
                 statesArr = [];
                 componentData.set(entityId, statesArr);
             }
-            // TODO: Cast statesArr as a StateWithID[]
             statesArr.push(newState);
         }
         else {
@@ -239,6 +239,27 @@ class ECS {
         if (!data)
             throw new Error(`Unknown component: ${componentName}.`);
         return (data.get(entityId) !== undefined);
+    }
+    /**
+     * Get all of the components attached to the given entity.
+     * @param entityId The entity to get a list of components from.
+     *
+     * @example
+     * ```js
+     * ecs.addComponent(id, 'comp-name')
+     * ecs.getAllComponents(id) // ['comp-name']
+     * ```
+     */
+    getAllComponents(entityId) {
+        const final = [];
+        for (const componentName in this.storage) {
+            if (this.storage.hasOwnProperty(componentName)) {
+                const states = this.storage[componentName];
+                if (states.has(entityId))
+                    final.push(componentName);
+            }
+        }
+        return final;
     }
     /**
      * Removes a component from an entity, deleting any state data.

@@ -360,7 +360,7 @@ export default class ECS {
    * ecs.getState(id, 'foo').val // 20
    * ```
    */
-  public addComponent (entityId: number, componentName: string, state?: StateWithID): ECS {
+  public addComponent (entityId: number, componentName: string, state?: any): ECS {
     const componentDefinition = this.components[componentName];
     const componentData = this.storage[componentName];
     if (!componentData) throw new Error(`Unknown component: ${componentName}.`);
@@ -414,6 +414,28 @@ export default class ECS {
     const data = this.storage[componentName];
     if (!data) throw new Error(`Unknown component: ${componentName}.`);
     return (data.get(entityId) !== undefined);
+  }
+
+  /**
+   * Get all of the components attached to the given entity.
+   * @param entityId The entity to get a list of components from.
+   * 
+   * @example
+   * ```js
+   * ecs.addComponent(id, 'comp-name')
+   * ecs.getAllComponents(id) // ['comp-name']
+   * ```
+   */
+  public getAllComponents(entityId: number): string[] {
+    const final = [];
+    for (const componentName in this.storage) {
+      if (this.storage.hasOwnProperty(componentName)) {
+        const states = this.storage[componentName];
+        
+        if (states.has(entityId)) final.push(componentName);
+      }
+    }
+    return final;
   }
 
   /**

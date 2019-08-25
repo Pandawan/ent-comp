@@ -29,7 +29,7 @@ Component Definition
 
 • **multi**? : *undefined | false | true*
 
-*Defined in [ECS.ts:18](https://github.com/PandawanFr/ent-comp/blob/2f91e20/src/ECS.ts#L18)*
+*Defined in [ECS.ts:18](https://github.com/PandawanFr/ent-comp/blob/88eb50f/src/ECS.ts#L18)*
 
 Whether or not an entity can have multiple instances of this component at once
 
@@ -39,7 +39,7 @@ ___
 
 • **name**: *string*
 
-*Defined in [ECS.ts:10](https://github.com/PandawanFr/ent-comp/blob/2f91e20/src/ECS.ts#L10)*
+*Defined in [ECS.ts:10](https://github.com/PandawanFr/ent-comp/blob/88eb50f/src/ECS.ts#L10)*
 
 Name of the component
 
@@ -49,7 +49,7 @@ ___
 
 • **onAdd**? : *undefined | function*
 
-*Defined in [ECS.ts:28](https://github.com/PandawanFr/ent-comp/blob/2f91e20/src/ECS.ts#L28)*
+*Defined in [ECS.ts:28](https://github.com/PandawanFr/ent-comp/blob/88eb50f/src/ECS.ts#L28)*
 
 Called when the component is added to an entity.
 
@@ -63,7 +63,7 @@ ___
 
 • **onRemove**? : *undefined | function*
 
-*Defined in [ECS.ts:35](https://github.com/PandawanFr/ent-comp/blob/2f91e20/src/ECS.ts#L35)*
+*Defined in [ECS.ts:35](https://github.com/PandawanFr/ent-comp/blob/88eb50f/src/ECS.ts#L35)*
 
 Called when the component is removed from an entity.
 
@@ -77,7 +77,7 @@ ___
 
 • **order**? : *undefined | number*
 
-*Defined in [ECS.ts:14](https://github.com/PandawanFr/ent-comp/blob/2f91e20/src/ECS.ts#L14)*
+*Defined in [ECS.ts:14](https://github.com/PandawanFr/ent-comp/blob/88eb50f/src/ECS.ts#L14)*
 
 Order to execute the components in
 
@@ -87,7 +87,7 @@ ___
 
 • **renderSystem**? : *undefined | function*
 
-*Defined in [ECS.ts:49](https://github.com/PandawanFr/ent-comp/blob/2f91e20/src/ECS.ts#L49)*
+*Defined in [ECS.ts:49](https://github.com/PandawanFr/ent-comp/blob/88eb50f/src/ECS.ts#L49)*
 
 Called every tick to render that component.
 
@@ -101,7 +101,7 @@ ___
 
 • **state**? : *any*
 
-*Defined in [ECS.ts:22](https://github.com/PandawanFr/ent-comp/blob/2f91e20/src/ECS.ts#L22)*
+*Defined in [ECS.ts:22](https://github.com/PandawanFr/ent-comp/blob/88eb50f/src/ECS.ts#L22)*
 
 Default state of the component
 
@@ -111,7 +111,7 @@ ___
 
 • **system**? : *undefined | function*
 
-*Defined in [ECS.ts:42](https://github.com/PandawanFr/ent-comp/blob/2f91e20/src/ECS.ts#L42)*
+*Defined in [ECS.ts:42](https://github.com/PandawanFr/ent-comp/blob/88eb50f/src/ECS.ts#L42)*
 
 Called every tick to process that component.
 
