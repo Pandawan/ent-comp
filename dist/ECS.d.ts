@@ -37,7 +37,7 @@ export interface Component {
      * @param id The entity's ID.
      * @param state The component's current state.
      */
-    onExternalEvent?: (event: string, id: number, state: StateWithID | StateWithID[]) => void;
+    onExternalEvent?: (event: string, id: number, state: StateWithID | StateWithID[]) => any;
     /**
      * Called every tick to process that component.
      * @param dt Length of one tick in ms.
