@@ -1,12 +1,34 @@
 "use strict";
 // TODO: Try to remove all <any>
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 ;
-class ECS {
-    get comps() {
-        console.error(new Error(`Alias "comps" is ugly and deprecated. Please use "components" instead.`));
-        return this.components;
-    }
+var ECS = /** @class */ (function () {
     /**
      * Constructor for a new entity-component-system manager.
      * @example
@@ -16,7 +38,7 @@ class ECS {
      * const ecs = new EntComp();
      * ```
      */
-    constructor() {
+    function ECS() {
         this.components = {};
         this.storage = {};
         this.systems = [];
@@ -28,6 +50,14 @@ class ECS {
         this.uid = 1;
         this.defaultOrder = 99;
     }
+    Object.defineProperty(ECS.prototype, "comps", {
+        get: function () {
+            console.error(new Error("Alias \"comps\" is ugly and deprecated. Please use \"components\" instead."));
+            return this.components;
+        },
+        enumerable: true,
+        configurable: true
+    });
     // #region Entity Management
     /**
      * Create a new entity id (currently just an incrementing integer).
@@ -40,15 +70,26 @@ class ECS {
      * var id2 = ecs.createEntity([ 'my-component' ])
      * ```
      */
-    createEntity(components) {
-        const id = this.uid++;
+    ECS.prototype.createEntity = function (components) {
+        var e_1, _a;
+        var id = this.uid++;
         if (components) {
-            for (const componentName of components) {
-                this.addComponent(id, componentName);
+            try {
+                for (var components_1 = __values(components), components_1_1 = components_1.next(); !components_1_1.done; components_1_1 = components_1.next()) {
+                    var componentName = components_1_1.value;
+                    this.addComponent(id, componentName);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (components_1_1 && !components_1_1.done && (_a = components_1.return)) _a.call(components_1);
+                }
+                finally { if (e_1) throw e_1.error; }
             }
         }
         return id;
-    }
+    };
     /**
      * Delete an entity, which in practice just means removing all its components.
      * By default the actual removal is deferred (since entities will tend to call this
@@ -63,7 +104,8 @@ class ECS {
      * ecs.deleteEntity(id2, true) // deletes immediately
      * ```
      */
-    deleteEntity(entityId, immediately = false) {
+    ECS.prototype.deleteEntity = function (entityId, immediately) {
+        if (immediately === void 0) { immediately = false; }
         if (immediately) {
             this.deleteEntityNow(entityId);
         }
@@ -72,17 +114,28 @@ class ECS {
             this.makeDeferralTimeout();
         }
         return this;
-    }
+    };
     /**
      * Delete an entity; simply removing all of its components.
      * @param entityId The id of the entity to delete.
      */
-    deleteEntityNow(entityId) {
-        for (const [name, data] of Object.entries(this.storage)) {
-            if (data.has(entityId))
-                this.removeComponentNow(entityId, name);
+    ECS.prototype.deleteEntityNow = function (entityId) {
+        var e_2, _a;
+        try {
+            for (var _b = __values(Object.entries(this.storage)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var _d = __read(_c.value, 2), name_1 = _d[0], data = _d[1];
+                if (data.has(entityId))
+                    this.removeComponentNow(entityId, name_1);
+            }
         }
-    }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+    };
     // #endregion
     // #region Component Management
     /**
@@ -105,7 +158,8 @@ class ECS {
      * // name == 'a-unique-string'
      * ```
      */
-    createComponent(componentDefinition) {
+    ECS.prototype.createComponent = function (componentDefinition) {
+        var _this = this;
         if (!componentDefinition)
             throw new Error('Missing component definition');
         var name = componentDefinition.name;
@@ -116,10 +170,10 @@ class ECS {
         if (name === '')
             throw new Error('Component name must be a non-empty string.');
         if (this.storage[name])
-            throw new Error(`Component ${name} already exists.`);
+            throw new Error("Component " + name + " already exists.");
         // rebuild definition object for monomorphism
-        const internalDef = {
-            name,
+        var internalDef = {
+            name: name,
             order: (!componentDefinition.order || isNaN(componentDefinition.order)) ? this.defaultOrder : componentDefinition.order,
             state: componentDefinition.state || {},
             onAdd: componentDefinition.onAdd || undefined,
@@ -132,14 +186,14 @@ class ECS {
         this.storage[name] = new Map();
         if (internalDef.system) {
             this.systems.push(name);
-            this.systems.sort((a, b) => (this.components[a].order || this.defaultOrder) - (this.components[b].order || this.defaultOrder));
+            this.systems.sort(function (a, b) { return (_this.components[a].order || _this.defaultOrder) - (_this.components[b].order || _this.defaultOrder); });
         }
         if (internalDef.renderSystem) {
             this.renderSystems.push(name);
-            this.renderSystems.sort((a, b) => (this.components[a].order || this.defaultOrder) - (this.components[b].order || this.defaultOrder));
+            this.renderSystems.sort(function (a, b) { return (_this.components[a].order || _this.defaultOrder) - (_this.components[b].order || _this.defaultOrder); });
         }
         return name;
-    }
+    };
     /**
      * Delete the component definition with the given name.
      * First removes the component from all entities that have it.
@@ -150,25 +204,36 @@ class ECS {
      * ecs.deleteComponent( comp.name )
      * ```
      */
-    deleteComponent(componentName) {
-        const componentData = this.storage[componentName];
+    ECS.prototype.deleteComponent = function (componentName) {
+        var e_3, _a;
+        var componentData = this.storage[componentName];
         if (!componentData)
-            throw new Error(`Unknown component: ${componentName}`);
-        for (const [, state] of componentData) {
-            const id = Array.isArray(state) ? state[0].__id : state.__id;
-            this.removeComponent(id, componentName, true);
+            throw new Error("Unknown component: " + componentName);
+        try {
+            for (var componentData_1 = __values(componentData), componentData_1_1 = componentData_1.next(); !componentData_1_1.done; componentData_1_1 = componentData_1.next()) {
+                var _b = __read(componentData_1_1.value, 2), state = _b[1];
+                var id = Array.isArray(state) ? state[0].__id : state.__id;
+                this.removeComponent(id, componentName, true);
+            }
+        }
+        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+        finally {
+            try {
+                if (componentData_1_1 && !componentData_1_1.done && (_a = componentData_1.return)) _a.call(componentData_1);
+            }
+            finally { if (e_3) throw e_3.error; }
         }
         // Remove componentNames from the systems list
-        const i = this.systems.indexOf(componentName);
+        var i = this.systems.indexOf(componentName);
         if (i > -1)
             this.systems.splice(i, 1);
-        const j = this.renderSystems.indexOf(componentName);
+        var j = this.renderSystems.indexOf(componentName);
         if (j > -1)
             this.renderSystems.splice(j, 1);
         delete this.components[componentName];
         delete this.storage[componentName];
         return this;
-    }
+    };
     /**
      * Adds a component to an entity, optionally initializing the state object.
      *
@@ -186,28 +251,39 @@ class ECS {
      * ecs.getState(id, 'foo').val // 20
      * ```
      */
-    addComponent(entityId, componentName, state) {
-        const componentDefinition = this.components[componentName];
-        const componentData = this.storage[componentName];
+    ECS.prototype.addComponent = function (entityId, componentName, state) {
+        var e_4, _a;
+        var componentDefinition = this.components[componentName];
+        var componentData = this.storage[componentName];
         if (!componentData)
-            throw new Error(`Unknown component: ${componentName}.`);
+            throw new Error("Unknown component: " + componentName + ".");
         // If the component is pending removal, remove it so it can be readded
-        let pendingRemoval = false;
-        for (const compRemoval of this.deferredCompRemovals) {
-            if (compRemoval.id === entityId && compRemoval.compName === componentName)
-                pendingRemoval = true;
+        var pendingRemoval = false;
+        try {
+            for (var _b = __values(this.deferredCompRemovals), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var compRemoval = _c.value;
+                if (compRemoval.id === entityId && compRemoval.compName === componentName)
+                    pendingRemoval = true;
+            }
+        }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_4) throw e_4.error; }
         }
         if (pendingRemoval)
             this.doDeferredComponentRemovals();
         if (componentData.has(entityId) && !componentDefinition.multi)
-            throw new Error(`Entity ${entityId} already has component: ${componentName}.`);
+            throw new Error("Entity " + entityId + " already has component: " + componentName + ".");
         // Create new component state object for this entity
-        const newState = Object.assign({}, { __id: entityId }, componentDefinition.state, state);
+        var newState = Object.assign({}, { __id: entityId }, componentDefinition.state, state);
         // Just in case passed-in state object had an __id property
         newState.__id = entityId;
         // Add to dataStore - for multi components, may already be present
         if (componentDefinition.multi) {
-            let statesArr = componentData.get(entityId);
+            var statesArr = componentData.get(entityId);
             if (!statesArr) {
                 statesArr = [];
                 componentData.set(entityId, statesArr);
@@ -221,7 +297,7 @@ class ECS {
         if (componentDefinition.onAdd)
             componentDefinition.onAdd(entityId, newState);
         return this;
-    }
+    };
     /**
      * Checks if an entity has a component.
      *
@@ -234,12 +310,12 @@ class ECS {
      * ecs.hasComponent(id, 'comp-name') // true
      * ```
      */
-    hasComponent(entityId, componentName) {
-        const data = this.storage[componentName];
+    ECS.prototype.hasComponent = function (entityId, componentName) {
+        var data = this.storage[componentName];
         if (!data)
-            throw new Error(`Unknown component: ${componentName}.`);
+            throw new Error("Unknown component: " + componentName + ".");
         return (data.get(entityId) !== undefined);
-    }
+    };
     /**
      * Get all of the components attached to the given entity.
      * @param entityId The entity to get a list of components from.
@@ -250,17 +326,17 @@ class ECS {
      * ecs.getAllComponents(id) // ['comp-name']
      * ```
      */
-    getAllComponents(entityId) {
-        const final = [];
-        for (const componentName in this.storage) {
+    ECS.prototype.getAllComponents = function (entityId) {
+        var final = [];
+        for (var componentName in this.storage) {
             if (this.storage.hasOwnProperty(componentName)) {
-                const states = this.storage[componentName];
+                var states = this.storage[componentName];
                 if (states.has(entityId))
                     final.push(componentName);
             }
         }
         return final;
-    }
+    };
     /**
      * Removes a component from an entity, deleting any state data.
      * @param entityId The id of the entity to remove from.
@@ -273,17 +349,18 @@ class ECS {
      * ecs.hasComponent(id, 'foo') // false
      * ```
      */
-    removeComponent(entityId, componentName, immediately = false) {
+    ECS.prototype.removeComponent = function (entityId, componentName, immediately) {
+        if (immediately === void 0) { immediately = false; }
         var componentDefinition = this.components[componentName];
         var componentData = this.storage[componentName];
         if (!componentData)
-            throw new Error(`Unknown component: ${componentName}.`);
+            throw new Error("Unknown component: " + componentName + ".");
         // If component isn't present, fail silently for multi or throw otherwise
         if (!componentData.has(entityId)) {
             if (componentDefinition.multi)
                 return this;
             else
-                throw new Error(`Entity ${entityId} does not have component: ${componentName} to remove.`);
+                throw new Error("Entity " + entityId + " does not have component: " + componentName + " to remove.");
         }
         // Defer or remove
         if (immediately) {
@@ -297,30 +374,41 @@ class ECS {
             this.makeDeferralTimeout();
         }
         return this;
-    }
+    };
     /**
      * Actually remove a component from the given entity.
      * @param entityId The id of the entity to remove the component from.
      * @param componentName The name of the component to remove.
      */
-    removeComponentNow(entityId, componentName) {
-        const componentDefinition = this.components[componentName];
-        const componentData = this.storage[componentName];
+    ECS.prototype.removeComponentNow = function (entityId, componentName) {
+        var e_5, _a;
+        var componentDefinition = this.components[componentName];
+        var componentData = this.storage[componentName];
         if (!componentData)
             return;
         if (!componentData.has(entityId))
             return; // probably got removed twice during deferral
         // Call onRemove handler - on each instance for multi components
-        const states = componentData.get(entityId);
+        var states = componentData.get(entityId);
         if (componentDefinition.onRemove && states) {
             if (componentDefinition.multi && Array.isArray(states)) {
-                for (const state of states) {
-                    componentDefinition.onRemove(entityId, state);
+                try {
+                    for (var states_1 = __values(states), states_1_1 = states_1.next(); !states_1_1.done; states_1_1 = states_1.next()) {
+                        var state = states_1_1.value;
+                        componentDefinition.onRemove(entityId, state);
+                    }
+                }
+                catch (e_5_1) { e_5 = { error: e_5_1 }; }
+                finally {
+                    try {
+                        if (states_1_1 && !states_1_1.done && (_a = states_1.return)) _a.call(states_1);
+                    }
+                    finally { if (e_5) throw e_5.error; }
                 }
             }
             else {
                 if (Array.isArray(states))
-                    throw new Error(`Found multiple states on non-multi component: ${componentName}`);
+                    throw new Error("Found multiple states on non-multi component: " + componentName);
                 componentDefinition.onRemove(entityId, states);
             }
         }
@@ -329,7 +417,7 @@ class ECS {
             states.length = 0;
         // Actual removal from data store
         componentData.delete(entityId);
-    }
+    };
     /**
      * Removes a particular state instance of a multi-component.
      * Pass a final truthy argument to make this happen synchronously - but be careful,
@@ -347,20 +435,21 @@ class ECS {
      * ecs.getState(id, 'foo')   // [ state1, state3 ]
      * ```
      */
-    removeMultiComponent(entityId, componentName, index, immediately = false) {
-        const componentDefinition = this.components[componentName];
-        const componentData = this.storage[componentName];
+    ECS.prototype.removeMultiComponent = function (entityId, componentName, index, immediately) {
+        if (immediately === void 0) { immediately = false; }
+        var componentDefinition = this.components[componentName];
+        var componentData = this.storage[componentName];
         if (!componentData)
-            throw new Error(`Unknown component: ${componentName}.`);
+            throw new Error("Unknown component: " + componentName + ".");
         if (!componentDefinition.multi)
             throw new Error('removeMultiComponent called on non-multi component');
         // throw if comp isn't present, or multicomp isn't present at index
-        const statesArr = componentData.get(entityId);
+        var statesArr = componentData.get(entityId);
         if (!statesArr || !Array.isArray(statesArr) || !statesArr[index]) {
-            throw new Error(`Multicomponent ${componentName} instance not found at index ${index}`);
+            throw new Error("Multicomponent " + componentName + " instance not found at index " + index);
         }
         // index removals by object, in case indexes change later
-        const stateToRemove = statesArr[index];
+        var stateToRemove = statesArr[index];
         if (immediately) {
             this.removeMultiComponentNow(entityId, componentName, stateToRemove);
         }
@@ -372,22 +461,22 @@ class ECS {
             });
         }
         return this;
-    }
+    };
     /**
      * Remove one state from a multi-component.
      * @param entityId The id of the entity to remove from.
      * @param componentName Then name of the component to remove.
      * @param stateObject The specific state to remove.
      */
-    removeMultiComponentNow(entityId, componentName, stateObject) {
-        const componentDefinition = this.components[componentName];
-        const componentData = this.storage[componentName];
+    ECS.prototype.removeMultiComponentNow = function (entityId, componentName, stateObject) {
+        var componentDefinition = this.components[componentName];
+        var componentData = this.storage[componentName];
         if (!componentData)
-            throw new Error(`Unknown component: ${componentName}.`);
-        const statesArr = componentData.get(entityId);
+            throw new Error("Unknown component: " + componentName + ".");
+        var statesArr = componentData.get(entityId);
         if (!statesArr)
             return;
-        const index = statesArr.indexOf(stateObject);
+        var index = statesArr.indexOf(stateObject);
         if (index < 0)
             return;
         if (componentDefinition.onRemove) {
@@ -398,7 +487,7 @@ class ECS {
         if (statesArr.length === 0) {
             this.removeComponentNow(entityId, componentName);
         }
-    }
+    };
     // #endregion
     // #region State Management
     /**
@@ -419,13 +508,13 @@ class ECS {
      * ecs.getState(id, 'foo').__id // equals id
      * ```
      */
-    getState(entityId, componentName) {
-        const data = this.storage[componentName];
+    ECS.prototype.getState = function (entityId, componentName) {
+        var data = this.storage[componentName];
         if (!data)
-            throw new Error(`Unknown component: ${componentName}.`);
-        const state = data.get(entityId);
+            throw new Error("Unknown component: " + componentName + ".");
+        var state = data.get(entityId);
         return state;
-    }
+    };
     /**
      * Get an array of state objects for every entity with the given component.
      * Each one will have an `__id` property for the entity id it refers to.
@@ -441,12 +530,12 @@ class ECS {
      * //     {__id:7, x:2}  ]
      * ```
     */
-    getStatesList(componentName) {
-        const data = this.storage[componentName];
+    ECS.prototype.getStatesList = function (componentName) {
+        var data = this.storage[componentName];
         if (!data)
-            throw new Error(`Unknown component: ${componentName}.`);
+            throw new Error("Unknown component: " + componentName + ".");
         return Array.from(data.values());
-    }
+    };
     /**
      * Returns a `getState`-like accessor function bound to a given component name.
      * The accessor is much faster than `getState`, so you should create an accessor
@@ -465,15 +554,15 @@ class ECS {
      * getSize(id).val // 0
      * ```
      */
-    getStateAccessor(componentName) {
-        const data = this.storage[componentName];
+    ECS.prototype.getStateAccessor = function (componentName) {
+        var data = this.storage[componentName];
         if (!data)
-            throw new Error(`Unknown component: ${componentName}.`);
+            throw new Error("Unknown component: " + componentName + ".");
         return function (entityId) {
-            const state = data.get(entityId);
+            var state = data.get(entityId);
             return state;
         };
-    }
+    };
     /**
      * Returns a `hasComponent`-like accessor function bound to a given component name.
      * The accessor is much faster than `hasComponent`.
@@ -490,14 +579,14 @@ class ECS {
      * hasFoo(id) // true
      * ```
      */
-    getComponentAccessor(componentName) {
-        const data = this.storage[componentName];
+    ECS.prototype.getComponentAccessor = function (componentName) {
+        var data = this.storage[componentName];
         if (!data)
-            throw new Error(`Unknown component: ${componentName}.`);
+            throw new Error("Unknown component: " + componentName + ".");
         return function (entityId) {
             return data.has(entityId);
         };
-    }
+    };
     // #endregion
     // #region Lifecycle
     /**
@@ -524,18 +613,29 @@ class ECS {
      * ecs.tick(30) // triggers log statements
      * ```
      */
-    tick(dt) {
+    ECS.prototype.tick = function (dt) {
+        var e_6, _a;
         this.runAllDeferredRemovals();
-        for (const componentName of this.systems) {
-            const list = Array.from(this.storage[componentName].values());
-            const component = this.components[componentName];
-            if (component.system) {
-                component.system(dt, list);
+        try {
+            for (var _b = __values(this.systems), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var componentName = _c.value;
+                var list = Array.from(this.storage[componentName].values());
+                var component = this.components[componentName];
+                if (component.system) {
+                    component.system(dt, list);
+                }
             }
+        }
+        catch (e_6_1) { e_6 = { error: e_6_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_6) throw e_6.error; }
         }
         this.runAllDeferredRemovals();
         return this;
-    }
+    };
     /**
      * Functions exactly like `tick`, but calls `renderSystem` functions.
      * this effectively gives you a second set of systems that are
@@ -557,73 +657,86 @@ class ECS {
      * ecs.render(1000/60)
      * ```
      */
-    render(dt) {
+    ECS.prototype.render = function (dt) {
+        var e_7, _a;
         this.runAllDeferredRemovals();
-        for (const componentName of this.renderSystems) {
-            const list = Array.from(this.storage[componentName].values());
-            const component = this.components[componentName];
-            if (component.renderSystem) {
-                component.renderSystem(dt, list);
+        try {
+            for (var _b = __values(this.renderSystems), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var componentName = _c.value;
+                var list = Array.from(this.storage[componentName].values());
+                var component = this.components[componentName];
+                if (component.renderSystem) {
+                    component.renderSystem(dt, list);
+                }
             }
+        }
+        catch (e_7_1) { e_7 = { error: e_7_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_7) throw e_7.error; }
         }
         this.runAllDeferredRemovals();
         return this;
-    }
+    };
     // #endregion
     // #region Deferral Management
     /**
      * Debouncer, called whenever a deferral is queued.
      */
-    makeDeferralTimeout() {
+    ECS.prototype.makeDeferralTimeout = function () {
+        var _this = this;
         if (this.deferralTimeoutPending)
             return;
         this.deferralTimeoutPending = true;
-        setTimeout(() => {
-            this.deferralTimeoutPending = false;
-            this.runAllDeferredRemovals();
+        setTimeout(function () {
+            _this.deferralTimeoutPending = false;
+            _this.runAllDeferredRemovals();
         }, 1);
-    }
+    };
     /**
      * Ping all removal queues.
      * Called before and after tick/render, and after deferrals are queued.
      */
-    runAllDeferredRemovals() {
+    ECS.prototype.runAllDeferredRemovals = function () {
         this.doDeferredComponentRemovals();
         this.doDeferredMultiComponentRemovals();
         this.doDeferredEntityRemovals();
-    }
+    };
     /**
      * Entity removal, processes the queue of entity IDs.
      */
-    doDeferredEntityRemovals() {
+    ECS.prototype.doDeferredEntityRemovals = function () {
         while (this.deferredEntityRemovals.length) {
-            const entityId = this.deferredEntityRemovals.pop();
+            var entityId = this.deferredEntityRemovals.pop();
             if (entityId === undefined)
                 continue;
             this.deleteEntityNow(entityId);
         }
-    }
+    };
     /**
      * Component removal, processes a queue of `{ id, compName }`
      */
-    doDeferredComponentRemovals() {
+    ECS.prototype.doDeferredComponentRemovals = function () {
         while (this.deferredCompRemovals.length) {
-            const removalRequest = this.deferredCompRemovals.pop();
+            var removalRequest = this.deferredCompRemovals.pop();
             if (removalRequest === undefined)
                 continue;
             this.removeComponentNow(removalRequest.id, removalRequest.compName);
         }
-    }
+    };
     // multi components - queue of { id, compName, state }
-    doDeferredMultiComponentRemovals() {
+    ECS.prototype.doDeferredMultiComponentRemovals = function () {
         while (this.deferredMultiCompRemovals.length) {
-            const removalRequest = this.deferredMultiCompRemovals.pop();
+            var removalRequest = this.deferredMultiCompRemovals.pop();
             if (removalRequest === undefined)
                 continue;
             this.removeMultiComponentNow(removalRequest.id, removalRequest.compName, removalRequest.state);
             // TODO: Why was this here? Is it trying to delete the actual object?
             // removalRequest.state = undefined;
         }
-    }
-}
+    };
+    return ECS;
+}());
 exports.default = ECS;
