@@ -38,8 +38,9 @@ See [docs](docs/README.md).
 Create the ECS, entities, and components thusly:
 
 ```js
-var EntComp = require('ent-comp')
-var ecs = new EntComp()
+// You might have to import the file directly rather than ent-comp
+import EntComp from './ECS';
+const ecs = new EntComp();
 
 // Entities are simply integer IDs:
 var playerID = ecs.createEntity() // 1

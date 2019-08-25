@@ -118,7 +118,6 @@ export default class ECS {
    * ecs.components['foo'] === comp // true
    * ```
    */
-  // TODO: Replace this with a Set
   public components: { [name: string]: Component };
 
   public get comps (): { [name: string]: Component } {
@@ -129,19 +128,16 @@ export default class ECS {
   /**
    * Storage for the component states
    */
-  // TODO: Replace this with a Set
   private storage: { [component: string]: Map<number, StateWithID | StateWithID[]> };
 
   /**
    * List of all systems, sorted by execution order
    */
-  // TODO: Replace this with a Set
   private systems: string[];
 
   /**
    * List of all renderSystems, sorted by execution order
    */
-  // TODO: Replace this with a Set
   private renderSystems: string[];
 
   /**
@@ -178,8 +174,9 @@ export default class ECS {
    * Constructor for a new entity-component-system manager.
    * @example
    * ```js
-   * var ECS = require('ent-comp')
-   * var ecs = new ECS()
+   * // You might have to import the file directly rather than ent-comp
+   * import EntComp from 'ent-comp';
+   * const ecs = new EntComp();
    * ```
    */
   public constructor () {
@@ -385,12 +382,11 @@ export default class ECS {
 
     // Add to dataStore - for multi components, may already be present
     if (componentDefinition.multi) {
-      let statesArr = componentData.get(entityId);
+      let statesArr = componentData.get(entityId) as StateWithID[];
       if (!statesArr) {
         statesArr = [];
         componentData.set(entityId, statesArr);
       }
-      // TODO: Cast statesArr as a StateWithID[]
       statesArr.push(newState);
     } else {
       componentData.set(entityId, newState);
