@@ -307,7 +307,7 @@ export default class ECS {
     if (!componentData) throw new Error(`Unknown component: ${componentName}`);
 
     for (const [, state] of componentData) {
-      const id = Array.isArray(state) ? state[0].__id : state.__id;
+      const id = state.__id;
       this.removeComponent(id, componentName, true);
     }
 

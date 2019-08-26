@@ -210,7 +210,7 @@ var ECS = /** @class */ (function () {
         try {
             for (var componentData_1 = __values(componentData), componentData_1_1 = componentData_1.next(); !componentData_1_1.done; componentData_1_1 = componentData_1.next()) {
                 var _b = __read(componentData_1_1.value, 2), state = _b[1];
-                var id = Array.isArray(state) ? state[0].__id : state.__id;
+                var id = state.__id;
                 this.removeComponent(id, componentName, true);
             }
         }

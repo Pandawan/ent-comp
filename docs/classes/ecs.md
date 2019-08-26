@@ -59,7 +59,7 @@
 
 \+ **new ECS**(): *[ECS](ecs.md)*
 
-*Defined in [ECS.ts:153](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L153)*
+*Defined in [ECS.ts:153](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L153)*
 
 Constructor for a new entity-component-system manager.
 
@@ -78,7 +78,7 @@ const ecs = new EntComp();
 
 • **components**: *object*
 
-*Defined in [ECS.ts:108](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L108)*
+*Defined in [ECS.ts:108](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L108)*
 
 Map of component definitions
 
@@ -99,7 +99,7 @@ ___
 
 • **defaultOrder**: *number*
 
-*Defined in [ECS.ts:153](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L153)*
+*Defined in [ECS.ts:153](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L153)*
 
 Default order to use if none specified
 
@@ -109,7 +109,7 @@ ___
 
 • **deferralTimeoutPending**: *boolean*
 
-*Defined in [ECS.ts:143](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L143)*
+*Defined in [ECS.ts:143](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L143)*
 
 Whether or not a deferral is currently pending.
 
@@ -119,7 +119,7 @@ ___
 
 • **deferredCompRemovals**: *ComponentRemovalRequest[]*
 
-*Defined in [ECS.ts:138](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L138)*
+*Defined in [ECS.ts:138](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L138)*
 
 List of all single-components waiting to be removed.
 
@@ -129,7 +129,7 @@ ___
 
 • **deferredEntityRemovals**: *number[]*
 
-*Defined in [ECS.ts:133](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L133)*
+*Defined in [ECS.ts:133](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L133)*
 
 List of all entityIds waiting to be removed.
 
@@ -139,7 +139,7 @@ ___
 
 • **renderSystems**: *string[]*
 
-*Defined in [ECS.ts:128](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L128)*
+*Defined in [ECS.ts:128](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L128)*
 
 List of all renderSystems, sorted by execution order
 
@@ -149,7 +149,7 @@ ___
 
 • **storage**: *object*
 
-*Defined in [ECS.ts:118](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L118)*
+*Defined in [ECS.ts:118](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L118)*
 
 Storage for the component states
 
@@ -163,7 +163,7 @@ ___
 
 • **systems**: *string[]*
 
-*Defined in [ECS.ts:123](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L123)*
+*Defined in [ECS.ts:123](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L123)*
 
 List of all systems, sorted by execution order
 
@@ -173,7 +173,7 @@ ___
 
 • **uid**: *number*
 
-*Defined in [ECS.ts:148](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L148)*
+*Defined in [ECS.ts:148](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L148)*
 
 Counter for entity IDs
 
@@ -183,7 +183,7 @@ Counter for entity IDs
 
 • **get comps**(): *object*
 
-*Defined in [ECS.ts:110](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L110)*
+*Defined in [ECS.ts:110](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L110)*
 
 **Returns:** *object*
 
@@ -195,7 +195,7 @@ Counter for entity IDs
 
 ▸ **addComponent**(`entityId`: number, `componentName`: string, `state?`: any): *[ECS](ecs.md)*
 
-*Defined in [ECS.ts:343](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L343)*
+*Defined in [ECS.ts:343](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L343)*
 
 Adds a component to an entity, optionally initializing the state object.
 
@@ -225,7 +225,7 @@ ___
 
 ▸ **createComponent**(`componentDefinition`: [Component](../interfaces/component.md)): *string*
 
-*Defined in [ECS.ts:261](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L261)*
+*Defined in [ECS.ts:261](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L261)*
 
 Create a new component from a definition object.
 The definition must have a `name` property; all others are optional.
@@ -260,7 +260,7 @@ ___
 
 ▸ **createEntity**(`components?`: string[]): *number*
 
-*Defined in [ECS.ts:193](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L193)*
+*Defined in [ECS.ts:193](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L193)*
 
 Create a new entity id (currently just an incrementing integer).
 
@@ -286,7 +286,7 @@ ___
 
 ▸ **deleteComponent**(`componentName`: string): *[ECS](ecs.md)*
 
-*Defined in [ECS.ts:305](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L305)*
+*Defined in [ECS.ts:305](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L305)*
 
 Delete the component definition with the given name.
 First removes the component from all entities that have it.
@@ -310,7 +310,7 @@ ___
 
 ▸ **deleteEntity**(`entityId`: number, `immediately`: boolean): *[ECS](ecs.md)*
 
-*Defined in [ECS.ts:217](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L217)*
+*Defined in [ECS.ts:217](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L217)*
 
 Delete an entity, which in practice just means removing all its components.
 By default the actual removal is deferred (since entities will tend to call this
@@ -337,7 +337,7 @@ ___
 
 ▸ **deleteEntityNow**(`entityId`: number): *void*
 
-*Defined in [ECS.ts:231](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L231)*
+*Defined in [ECS.ts:231](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L231)*
 
 Delete an entity; simply removing all of its components.
 
@@ -355,7 +355,7 @@ ___
 
 ▸ **doDeferredComponentRemovals**(): *void*
 
-*Defined in [ECS.ts:684](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L684)*
+*Defined in [ECS.ts:684](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L684)*
 
 Component removal, processes a queue of `{ id, compName }`
 
@@ -367,7 +367,7 @@ ___
 
 ▸ **doDeferredEntityRemovals**(): *void*
 
-*Defined in [ECS.ts:673](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L673)*
+*Defined in [ECS.ts:673](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L673)*
 
 Entity removal, processes the queue of entity IDs.
 
@@ -379,7 +379,7 @@ ___
 
 ▸ **getAllComponents**(`entityId`: number): *string[]*
 
-*Defined in [ECS.ts:400](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L400)*
+*Defined in [ECS.ts:400](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L400)*
 
 Get all of the components attached to the given entity.
 
@@ -403,7 +403,7 @@ ___
 
 ▸ **getComponentAccessor**(`componentName`: string): *[ComponentAccessor](../README.md#componentaccessor)*
 
-*Defined in [ECS.ts:562](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L562)*
+*Defined in [ECS.ts:562](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L562)*
 
 Returns a `hasComponent`-like accessor function bound to a given component name.
 The accessor is much faster than `hasComponent`.
@@ -434,7 +434,7 @@ ___
 
 ▸ **getState**(`entityId`: number, `componentName`: string): *[StateWithID](../interfaces/statewithid.md) | undefined*
 
-*Defined in [ECS.ts:490](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L490)*
+*Defined in [ECS.ts:490](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L490)*
 
 Get the component state for a given entity.
 It will automatically be populated with an `__id` property denoting the entity id.
@@ -467,7 +467,7 @@ ___
 
 ▸ **getStateAccessor**(`componentName`: string): *[StateAccessor](../README.md#stateaccessor)*
 
-*Defined in [ECS.ts:537](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L537)*
+*Defined in [ECS.ts:537](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L537)*
 
 Returns a `getState`-like accessor function bound to a given component name.
 The accessor is much faster than `getState`, so you should create an accessor
@@ -500,7 +500,7 @@ ___
 
 ▸ **getStatesList**(`componentName`: string): *Array‹[StateWithID](../interfaces/statewithid.md)›*
 
-*Defined in [ECS.ts:513](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L513)*
+*Defined in [ECS.ts:513](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L513)*
 
 Get an array of state objects for every entity with the given component.
 Each one will have an `__id` property for the entity id it refers to.
@@ -528,7 +528,7 @@ ___
 
 ▸ **hasComponent**(`entityId`: number, `componentName`: string): *boolean*
 
-*Defined in [ECS.ts:384](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L384)*
+*Defined in [ECS.ts:384](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L384)*
 
 Checks if an entity has a component.
 
@@ -553,7 +553,7 @@ ___
 
 ▸ **makeDeferralTimeout**(): *void*
 
-*Defined in [ECS.ts:652](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L652)*
+*Defined in [ECS.ts:652](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L652)*
 
 Debouncer, called whenever a deferral is queued.
 
@@ -565,7 +565,7 @@ ___
 
 ▸ **removeComponent**(`entityId`: number, `componentName`: string, `immediately`: boolean): *[ECS](ecs.md)*
 
-*Defined in [ECS.ts:424](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L424)*
+*Defined in [ECS.ts:424](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L424)*
 
 Removes a component from an entity, deleting any state data.
 
@@ -591,7 +591,7 @@ ___
 
 ▸ **removeComponentNow**(`entityId`: number, `componentName`: string): *void*
 
-*Defined in [ECS.ts:452](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L452)*
+*Defined in [ECS.ts:452](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L452)*
 
 Actually remove a component from the given entity.
 
@@ -610,7 +610,7 @@ ___
 
 ▸ **render**(`dt`: number): *[ECS](ecs.md)*
 
-*Defined in [ECS.ts:632](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L632)*
+*Defined in [ECS.ts:632](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L632)*
 
 Functions exactly like `tick`, but calls `renderSystem` functions.
 this effectively gives you a second set of systems that are
@@ -644,7 +644,7 @@ ___
 
 ▸ **runAllDeferredRemovals**(): *void*
 
-*Defined in [ECS.ts:665](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L665)*
+*Defined in [ECS.ts:665](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L665)*
 
 Ping all removal queues.
 Called before and after tick/render, and after deferrals are queued.
@@ -657,7 +657,7 @@ ___
 
 ▸ **tick**(`dt`: number): *[ECS](ecs.md)*
 
-*Defined in [ECS.ts:598](https://github.com/PandawanFr/ent-comp/blob/67acdf0/src/ECS.ts#L598)*
+*Defined in [ECS.ts:598](https://github.com/PandawanFr/ent-comp/blob/8dd3929/src/ECS.ts#L598)*
 
 Tells the ECS that a game tick has occurred, causing component
 `system` functions to get called.
