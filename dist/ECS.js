@@ -33,12 +33,12 @@ var ECS = /** @class */ (function () {
      * Constructor for a new entity-component-system manager.
      * @example
      * ```js
-     * // You might have to import the file directly rather than ent-comp
      * import EntComp from 'ent-comp';
      * const ecs = new EntComp();
+     * // Can also use `new EntComp({ defaultOrder: 15});` to set the default component.order value.
      * ```
      */
-    function ECS() {
+    function ECS(options) {
         this.components = {};
         this.storage = {};
         this.systems = [];
@@ -47,7 +47,7 @@ var ECS = /** @class */ (function () {
         this.deferredCompRemovals = [];
         this.deferralTimeoutPending = false;
         this.uid = 1;
-        this.defaultOrder = 99;
+        this._defaultOrder = options && options.defaultOrder ? options.defaultOrder : 99;
     }
     Object.defineProperty(ECS.prototype, "comps", {
         get: function () {
@@ -57,6 +57,27 @@ var ECS = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(ECS.prototype, "defaultOrder", {
+        // #region Properties
+        get: function () {
+            return this._defaultOrder;
+        },
+        set: function (value) {
+            var _this = this;
+            // Set the value
+            this._defaultOrder = value;
+            // Sort the systems and renderSystems based on the new defaultOrder value
+            if (this.systems) {
+                this.systems.sort(function (a, b) { return (_this.components[a].order || _this.defaultOrder) - (_this.components[b].order || _this.defaultOrder); });
+            }
+            if (this.renderSystems) {
+                this.renderSystems.sort(function (a, b) { return (_this.components[a].order || _this.defaultOrder) - (_this.components[b].order || _this.defaultOrder); });
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+    // #endregion
     // #region Entity Management
     /**
      * Create a new entity id (currently just an incrementing integer).

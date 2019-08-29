@@ -15,13 +15,13 @@ To get started, check the usage examples below, or the [API reference](docs/READ
 To use as a dependency:
 
 ```sh
-npm install ent-comp
+npm install PandawanFr/ent-comp
 ```
 
 To hack on it:
 
 ```sh
-git clone https://github.com/andyhall/ent-comp.git
+git clone https://github.com/PandawanFr/ent-comp.git
 cd ent-comp
 npm install
 npm test         # run tests
@@ -245,6 +245,8 @@ ecs.addComponent(id, 'foo', { vector3: [1,1,1] })
 
 ## Change list
 
+* 1.2.0
+  * Add `defaultOrder` option and property; updating this value will re-sort the `systems` and `renderSystems` arrays.
 * 1.1.0
   * Remove `multi`-components, they're annoying and not very usefu; just use an array within states :)
 * 1.0.0

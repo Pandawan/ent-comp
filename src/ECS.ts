@@ -150,18 +150,18 @@ export default class ECS {
   /**
    * Default order to use if none specified
    */
-  private defaultOrder: number;
+  private _defaultOrder: number;
 
   /**
    * Constructor for a new entity-component-system manager.
    * @example
    * ```js
-   * // You might have to import the file directly rather than ent-comp
    * import EntComp from 'ent-comp';
    * const ecs = new EntComp();
+   * // Can also use `new EntComp({ defaultOrder: 15});` to set the default component.order value.
    * ```
    */
-  public constructor () {
+  public constructor (options?: { defaultOrder: number }) {
     this.components = {};
     this.storage = {};
 
@@ -174,8 +174,30 @@ export default class ECS {
     this.deferralTimeoutPending = false;
 
     this.uid = 1;
-    this.defaultOrder = 99;
+    this._defaultOrder = options && options.defaultOrder ? options.defaultOrder : 99;
   }
+
+  // #region Properties
+
+  public get defaultOrder (): number {
+    return this._defaultOrder;
+  }
+
+  public set defaultOrder (value: number) {
+    // Set the value
+    this._defaultOrder = value;
+
+    // Sort the systems and renderSystems based on the new defaultOrder value
+    if (this.systems) {
+      this.systems.sort((a, b) => (this.components[a].order || this.defaultOrder) - (this.components[b].order || this.defaultOrder));
+    }
+    if (this.renderSystems) {
+      this.renderSystems.sort((a, b) => (this.components[a].order || this.defaultOrder) - (this.components[b].order || this.defaultOrder));
+    }
+  }
+
+
+  // #endregion
 
   // #region Entity Management
 

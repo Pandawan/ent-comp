@@ -117,17 +117,20 @@ export default class ECS {
     /**
      * Default order to use if none specified
      */
-    private defaultOrder;
+    private _defaultOrder;
     /**
      * Constructor for a new entity-component-system manager.
      * @example
      * ```js
-     * // You might have to import the file directly rather than ent-comp
      * import EntComp from 'ent-comp';
      * const ecs = new EntComp();
+     * // Can also use `new EntComp({ defaultOrder: 15});` to set the default component.order value.
      * ```
      */
-    constructor();
+    constructor(options?: {
+        defaultOrder: number;
+    });
+    defaultOrder: number;
     /**
      * Create a new entity id (currently just an incrementing integer).
      * @param components (optional) Components to add to the entity (with default state data).
