@@ -189,13 +189,21 @@ export default class ECS {
 
     // Sort the systems and renderSystems based on the new defaultOrder value
     if (this.systems) {
-      this.systems.sort((a, b) => (this.components[a].order || this.defaultOrder) - (this.components[b].order || this.defaultOrder));
+      this.sortByOrder(this.systems);
     }
     if (this.renderSystems) {
-      this.renderSystems.sort((a, b) => (this.components[a].order || this.defaultOrder) - (this.components[b].order || this.defaultOrder));
+      this.sortByOrder(this.renderSystems);
     }
   }
 
+  /**
+   * Sort the given list of component names using their component.order value (or the defaultOrder value).
+   * NOTE: This mutates the original array, make a copy of it first if you want it immutable.
+   * @param componentNames The list of component names to sort.
+   */
+  public sortByOrder(componentNames: string[]): void {
+    componentNames.sort((a, b) => (this.components[a].order || this.defaultOrder) - (this.components[b].order || this.defaultOrder));
+  }
 
   // #endregion
 
@@ -304,11 +312,11 @@ export default class ECS {
 
     if (internalDef.system) {
       this.systems.push(name);
-      this.systems.sort((a, b) => (this.components[a].order || this.defaultOrder) - (this.components[b].order || this.defaultOrder));
+      this.sortByOrder(this.systems);
     }
     if (internalDef.renderSystem) {
       this.renderSystems.push(name);
-      this.renderSystems.sort((a, b) => (this.components[a].order || this.defaultOrder) - (this.components[b].order || this.defaultOrder));
+      this.sortByOrder(this.renderSystems);
     }
 
     return name;

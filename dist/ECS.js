@@ -63,20 +63,28 @@ var ECS = /** @class */ (function () {
             return this._defaultOrder;
         },
         set: function (value) {
-            var _this = this;
             // Set the value
             this._defaultOrder = value;
             // Sort the systems and renderSystems based on the new defaultOrder value
             if (this.systems) {
-                this.systems.sort(function (a, b) { return (_this.components[a].order || _this.defaultOrder) - (_this.components[b].order || _this.defaultOrder); });
+                this.sortByOrder(this.systems);
             }
             if (this.renderSystems) {
-                this.renderSystems.sort(function (a, b) { return (_this.components[a].order || _this.defaultOrder) - (_this.components[b].order || _this.defaultOrder); });
+                this.sortByOrder(this.renderSystems);
             }
         },
         enumerable: true,
         configurable: true
     });
+    /**
+     * Sort the given list of component names using their component.order value (or the defaultOrder value).
+     * NOTE: This mutates the original array, make a copy of it first if you want it immutable.
+     * @param componentNames The list of component names to sort.
+     */
+    ECS.prototype.sortByOrder = function (componentNames) {
+        var _this = this;
+        componentNames.sort(function (a, b) { return (_this.components[a].order || _this.defaultOrder) - (_this.components[b].order || _this.defaultOrder); });
+    };
     // #endregion
     // #region Entity Management
     /**
@@ -179,7 +187,6 @@ var ECS = /** @class */ (function () {
      * ```
      */
     ECS.prototype.createComponent = function (componentDefinition) {
-        var _this = this;
         if (!componentDefinition)
             throw new Error('Missing component definition');
         var name = componentDefinition.name;
@@ -205,11 +212,11 @@ var ECS = /** @class */ (function () {
         this.storage[name] = new Map();
         if (internalDef.system) {
             this.systems.push(name);
-            this.systems.sort(function (a, b) { return (_this.components[a].order || _this.defaultOrder) - (_this.components[b].order || _this.defaultOrder); });
+            this.sortByOrder(this.systems);
         }
         if (internalDef.renderSystem) {
             this.renderSystems.push(name);
-            this.renderSystems.sort(function (a, b) { return (_this.components[a].order || _this.defaultOrder) - (_this.components[b].order || _this.defaultOrder); });
+            this.sortByOrder(this.renderSystems);
         }
         return name;
     };

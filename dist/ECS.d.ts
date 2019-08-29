@@ -132,6 +132,12 @@ export default class ECS {
     });
     defaultOrder: number;
     /**
+     * Sort the given list of component names using their component.order value (or the defaultOrder value).
+     * NOTE: This mutates the original array, make a copy of it first if you want it immutable.
+     * @param componentNames The list of component names to sort.
+     */
+    sortByOrder(componentNames: string[]): void;
+    /**
      * Create a new entity id (currently just an incrementing integer).
      * @param components (optional) Components to add to the entity (with default state data).
      * @returns The newly created entity's ID.
