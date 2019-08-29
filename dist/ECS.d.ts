@@ -136,7 +136,7 @@ export default class ECS {
      * NOTE: This mutates the original array, make a copy of it first if you want it immutable.
      * @param componentNames The list of component names to sort.
      */
-    sortByOrder(componentNames: string[]): void;
+    sortByOrder(componentNames: string[]): string[];
     /**
      * Create a new entity id (currently just an incrementing integer).
      * @param components (optional) Components to add to the entity (with default state data).

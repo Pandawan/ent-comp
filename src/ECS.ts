@@ -201,8 +201,8 @@ export default class ECS {
    * NOTE: This mutates the original array, make a copy of it first if you want it immutable.
    * @param componentNames The list of component names to sort.
    */
-  public sortByOrder(componentNames: string[]): void {
-    componentNames.sort((a, b) => (this.components[a].order || this.defaultOrder) - (this.components[b].order || this.defaultOrder));
+  public sortByOrder(componentNames: string[]): string[] {
+    return componentNames.sort((a, b) => (this.components[a].order || this.defaultOrder) - (this.components[b].order || this.defaultOrder));
   }
 
   // #endregion

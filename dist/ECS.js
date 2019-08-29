@@ -83,7 +83,7 @@ var ECS = /** @class */ (function () {
      */
     ECS.prototype.sortByOrder = function (componentNames) {
         var _this = this;
-        componentNames.sort(function (a, b) { return (_this.components[a].order || _this.defaultOrder) - (_this.components[b].order || _this.defaultOrder); });
+        return componentNames.sort(function (a, b) { return (_this.components[a].order || _this.defaultOrder) - (_this.components[b].order || _this.defaultOrder); });
     };
     // #endregion
     // #region Entity Management

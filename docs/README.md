@@ -24,7 +24,7 @@
 
 Ƭ **ComponentAccessor**: *function*
 
-*Defined in [ECS.ts:81](https://github.com/PandawanFr/ent-comp/blob/5921f6c/src/ECS.ts#L81)*
+*Defined in [ECS.ts:81](https://github.com/PandawanFr/ent-comp/blob/a96e15d/src/ECS.ts#L81)*
 
 A `hasComponent`-like accessor function bound to a given component name.
 
@@ -48,7 +48,7 @@ ___
 
 Ƭ **StateAccessor**: *function*
 
-*Defined in [ECS.ts:74](https://github.com/PandawanFr/ent-comp/blob/5921f6c/src/ECS.ts#L74)*
+*Defined in [ECS.ts:74](https://github.com/PandawanFr/ent-comp/blob/a96e15d/src/ECS.ts#L74)*
 
 A `getState`-like accessor function bound to a given component name.
 
