@@ -1,7 +1,7 @@
 /**
  * Component Definition
  */
-export interface Component {
+export interface Component<T extends StateWithID> {
     /**
      * Name of the component
      */
@@ -13,19 +13,19 @@ export interface Component {
     /**
      * Default state of the component
      */
-    state?: any;
+    state?: Omit<T, '__id'>;
     /**
      * Called when the component is added to an entity.
      * @param id The entity's ID.
      * @param state The components's new state.
      */
-    onAdd?: (id: number, state: StateWithID) => void;
+    onAdd?: (id: number, state: T) => void;
     /**
      * Called when the component is removed from an entity.
      * @param id The entity's ID.
      * @param state The components's current state.
      */
-    onRemove?: (id: number, state: StateWithID) => void;
+    onRemove?: (id: number, state: T) => void;
     /**
      * Use this for any external events that need to be sent to the component.
      * (This is never called by ent-comp).
@@ -33,19 +33,19 @@ export interface Component {
      * @param id The entity's ID.
      * @param state The component's current state.
      */
-    onExternalEvent?: (event: string, id: number, state: StateWithID) => any;
+    onExternalEvent?: (event: string, id: number, state: T) => any;
     /**
      * Called every tick to process that component.
      * @param dt Length of one tick in ms.
      * @param states Array of all states of this component type.
      */
-    system?: (dt: number, states: Array<StateWithID>) => void;
+    system?: (dt: number, states: Array<T>) => void;
     /**
      * Called every tick to render that component.
      * @param dt Length of one render tick in ms.
      * @param states Array of all states of this component type.
      */
-    renderSystem?: (dt: number, states: Array<StateWithID>) => void;
+    renderSystem?: (dt: number, states: Array<T>) => void;
 }
 /**
  * Component state object with an __id referring to the entity that owns it.
@@ -55,14 +55,13 @@ export interface StateWithID {
      * The id of the entity this state refers to
      */
     __id: number;
-    [key: string]: any;
 }
 /**
  * A `getState`-like accessor function bound to a given component name.
  * @param entID The id of the entity to get from.
  * @returns The state of that entity's component.
  */
-export declare type StateAccessor = ((entID: number) => StateWithID | undefined);
+export declare type StateAccessor<T extends StateWithID> = ((entID: number) => T | undefined);
 /**
  * A `hasComponent`-like accessor function bound to a given component name.
  * @param entID the id of the entity to get from.
@@ -81,10 +80,10 @@ export default class ECS {
      * ```
      */
     components: {
-        [name: string]: Component;
+        [name: string]: Component<any>;
     };
     readonly comps: {
-        [name: string]: Component;
+        [name: string]: Component<any>;
     };
     /**
      * Storage for the component states
@@ -189,7 +188,7 @@ export default class ECS {
      * // name == 'a-unique-string'
      * ```
      */
-    createComponent(componentDefinition: Component): string;
+    createComponent<T extends StateWithID>(componentDefinition: Component<T>): string;
     /**
      * Delete the component definition with the given name.
      * First removes the component from all entities that have it.
@@ -315,7 +314,7 @@ export default class ECS {
      * getSize(id).val // 0
      * ```
      */
-    getStateAccessor(componentName: string): StateAccessor;
+    getStateAccessor<T extends StateWithID>(componentName: string): StateAccessor<T>;
     /**
      * Returns a `hasComponent`-like accessor function bound to a given component name.
      * The accessor is much faster than `hasComponent`.

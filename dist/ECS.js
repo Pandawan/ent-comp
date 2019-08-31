@@ -473,6 +473,7 @@ var ECS = /** @class */ (function () {
      * getSize(id).val // 0
      * ```
      */
+    // TODO: Find a way to infer type maybe? Kind of complex since typing is at compile time.
     ECS.prototype.getStateAccessor = function (componentName) {
         var data = this.storage[componentName];
         if (!data)

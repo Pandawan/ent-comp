@@ -10,12 +10,6 @@ Component state object with an __id referring to the entity that owns it.
 
 * **StateWithID**
 
-## Indexable
-
-* \[ **key**: *string*\]: any
-
-Component state object with an __id referring to the entity that owns it.
-
 ## Index
 
 ### Properties
@@ -28,6 +22,6 @@ Component state object with an __id referring to the entity that owns it.
 
 • **__id**: *number*
 
-*Defined in [ECS.ts:65](https://github.com/PandawanFr/ent-comp/blob/a96e15d/src/ECS.ts#L65)*
+*Defined in [ECS.ts:65](https://github.com/PandawanFr/ent-comp/blob/4377491/src/ECS.ts#L65)*
 
 The id of the entity this state refers to

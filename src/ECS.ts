@@ -3,7 +3,7 @@
 /**
  * Component Definition
  */
-export interface Component {
+export interface Component<T extends StateWithID> {
   /**
    * Name of the component
    */
@@ -15,20 +15,20 @@ export interface Component {
   /**
    * Default state of the component
    */
-  state?: any;
+  state?: Omit<T, '__id'>;
   /**
    * Called when the component is added to an entity.
    * @param id The entity's ID.
    * @param state The components's new state.
    */
-  onAdd?: (id: number, state: StateWithID) => void;
+  onAdd?: (id: number, state: T) => void;
 
   /**
    * Called when the component is removed from an entity.
    * @param id The entity's ID.
    * @param state The components's current state.
    */
-  onRemove?: (id: number, state: StateWithID) => void;
+  onRemove?: (id: number, state: T) => void;
 
   /**
    * Use this for any external events that need to be sent to the component.
@@ -37,21 +37,21 @@ export interface Component {
    * @param id The entity's ID.
    * @param state The component's current state.
    */
-  onExternalEvent?: (event: string, id: number, state: StateWithID) => any;
+  onExternalEvent?: (event: string, id: number, state: T) => any;
 
   /**
    * Called every tick to process that component.
    * @param dt Length of one tick in ms.
    * @param states Array of all states of this component type.
    */
-  system?: (dt: number, states: Array<StateWithID>) => void;
+  system?: (dt: number, states: Array<T>) => void;
 
   /**
    * Called every tick to render that component.
    * @param dt Length of one render tick in ms.
    * @param states Array of all states of this component type.
    */
-  renderSystem?: (dt: number, states: Array<StateWithID>) => void;
+  renderSystem?: (dt: number, states: Array<T>) => void;
 }
 
 /**
@@ -63,7 +63,6 @@ export interface StateWithID {
    * The id of the entity this state refers to
    */
   __id: number;
-  [key: string]: any;
 };
 
 /**
@@ -71,7 +70,7 @@ export interface StateWithID {
  * @param entID The id of the entity to get from.
  * @returns The state of that entity's component.
  */
-export type StateAccessor = ((entID: number) => StateWithID | undefined);
+export type StateAccessor<T extends StateWithID> = ((entID: number) => T | undefined);
 
 /**
  * A `hasComponent`-like accessor function bound to a given component name.
@@ -105,9 +104,9 @@ export default class ECS {
    * ecs.components['foo'] === comp // true
    * ```
    */
-  public components: { [name: string]: Component };
+  public components: { [name: string]: Component<any> };
 
-  public get comps (): { [name: string]: Component } {
+  public get comps (): { [name: string]: Component<any> } {
     console.error(new Error(`Alias "comps" is ugly and deprecated. Please use "components" instead.`));
     return this.components;
   }
@@ -288,7 +287,7 @@ export default class ECS {
    * // name == 'a-unique-string'
    * ```
    */
-  public createComponent (componentDefinition: Component): string {
+  public createComponent<T extends StateWithID>(componentDefinition: Component<T>): string {
     if (!componentDefinition) throw new Error('Missing component definition');
     var name = componentDefinition.name;
     if (!name) throw new Error('Component definition must have a name property.');
@@ -297,7 +296,7 @@ export default class ECS {
     if (this.storage[name]) throw new Error(`Component ${name} already exists.`);
 
     // rebuild definition object for monomorphism
-    const internalDef: Component = {
+    const internalDef: Component<T> = {
       name,
       order: (!componentDefinition.order || isNaN(componentDefinition.order)) ? this.defaultOrder : componentDefinition.order,
       state: componentDefinition.state || {} as any,
@@ -564,11 +563,12 @@ export default class ECS {
    * getSize(id).val // 0
    * ```
    */
-  public getStateAccessor (componentName: string): StateAccessor {
+  // TODO: Find a way to infer type maybe? Kind of complex since typing is at compile time.
+  public getStateAccessor<T extends StateWithID> (componentName: string): StateAccessor<T> { 
     const data = this.storage[componentName];
     if (!data) throw new Error(`Unknown component: ${componentName}.`);
     return function (entityId: number) {
-      const state = data.get(entityId);
+      const state = data.get(entityId) as T;
       return state;
     };
   }
