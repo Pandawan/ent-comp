@@ -1,5 +1,3 @@
-// TODO: Try to remove all <any>
-
 /**
  * Component Definition
  */
@@ -64,6 +62,14 @@ export interface StateWithID {
    */
   __id: number;
 };
+
+/**
+ * Component state object with an unknown shape.
+ * (Use this for states that you don't know the shape of).
+ */
+export interface UnknownStateWithID extends StateWithID {
+  [key: string]: any;
+}
 
 /**
  * A `getState`-like accessor function bound to a given component name.

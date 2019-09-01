@@ -10,6 +10,8 @@ Component state object with an __id referring to the entity that owns it.
 
 * **StateWithID**
 
+  * [UnknownStateWithID](unknownstatewithid.md)
+
 ## Index
 
 ### Properties
@@ -22,6 +24,6 @@ Component state object with an __id referring to the entity that owns it.
 
 • **__id**: *number*
 
-*Defined in [ECS.ts:65](https://github.com/PandawanFr/ent-comp/blob/4377491/src/ECS.ts#L65)*
+*Defined in [ECS.ts:63](https://github.com/PandawanFr/ent-comp/blob/3d6c7bd/src/ECS.ts#L63)*
 
 The id of the entity this state refers to

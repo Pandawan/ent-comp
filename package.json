@@ -1,6 +1,6 @@
 {
   "name": "ent-comp",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "A light, fast Entity Component System in TS",
   "main": "dist/ECS.js",
   "types": "dist/ECS.d.ts",
@@ -34,8 +34,8 @@
     "fen-bench": "^0.1.0",
     "tape": "^4.4.0",
     "typedoc": "^0.15.0",
-    "typedoc-plugin-markdown": "^2.1.3",
-    "typescript": "^3.5.3"
+    "typedoc-plugin-markdown": "^2.1.7",
+    "typescript": "^3.6.2"
   },
   "dependencies": {}
 }

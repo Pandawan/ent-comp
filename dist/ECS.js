@@ -1,5 +1,4 @@
 "use strict";
-// TODO: Try to remove all <any>
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
     if (m) return m.call(o);

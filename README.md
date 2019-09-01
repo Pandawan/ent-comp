@@ -245,6 +245,10 @@ ecs.addComponent(id, 'foo', { vector3: [1,1,1] })
 
 ## Change list
 
+* 1.3.0
+  * Add `sortByOrder` method to sort component arrays using their componentDefinition.order.
+  * Add generic T type for component definitions so their methods can return custom state typings.
+  * Add UnknownStateWithID for better typing (this is not used internally).
 * 1.2.0
   * Add `defaultOrder` option and property; updating this value will re-sort the `systems` and `renderSystems` arrays.
 * 1.1.0

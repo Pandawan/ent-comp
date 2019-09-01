@@ -12,6 +12,7 @@
 
 * [Component](interfaces/component.md)
 * [StateWithID](interfaces/statewithid.md)
+* [UnknownStateWithID](interfaces/unknownstatewithid.md)
 
 ### Type aliases
 
@@ -24,7 +25,7 @@
 
 Ƭ **ComponentAccessor**: *function*
 
-*Defined in [ECS.ts:80](https://github.com/PandawanFr/ent-comp/blob/4377491/src/ECS.ts#L80)*
+*Defined in [ECS.ts:86](https://github.com/PandawanFr/ent-comp/blob/3d6c7bd/src/ECS.ts#L86)*
 
 A `hasComponent`-like accessor function bound to a given component name.
 
@@ -48,7 +49,7 @@ ___
 
 Ƭ **StateAccessor**: *function*
 
-*Defined in [ECS.ts:73](https://github.com/PandawanFr/ent-comp/blob/4377491/src/ECS.ts#L73)*
+*Defined in [ECS.ts:79](https://github.com/PandawanFr/ent-comp/blob/3d6c7bd/src/ECS.ts#L79)*
 
 A `getState`-like accessor function bound to a given component name.
 
