@@ -1,5 +1,6 @@
 /**
- * Component Definition
+ * Component Definition.
+ * @template T Use the generic T parameter to describe the Component's custom state.
  */
 export interface Component<T extends StateWithID> {
   /**
@@ -34,6 +35,7 @@ export interface Component<T extends StateWithID> {
    * @param event The name of the event.
    * @param id The entity's ID.
    * @param state The component's current state.
+   * @returns Any value you want back from the event handler.
    */
   onExternalEvent?: (event: string, id: number, state: T) => any;
 
@@ -112,6 +114,10 @@ export default class ECS {
    */
   public components: { [name: string]: Component<any> };
 
+  /**
+   * Alias for `components` property.
+   * @deprecated
+   */
   public get comps (): { [name: string]: Component<any> } {
     console.error(new Error(`Alias "comps" is ugly and deprecated. Please use "components" instead.`));
     return this.components;
@@ -184,6 +190,9 @@ export default class ECS {
 
   // #region Properties
 
+  /**
+   * The default `order` value of the components.
+   */
   public get defaultOrder (): number {
     return this._defaultOrder;
   }

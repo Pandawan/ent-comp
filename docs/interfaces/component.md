@@ -4,7 +4,9 @@
 
 # Interface: Component <**T**>
 
-Component Definition
+Component Definition.
+
+**`template`** T Use the generic T parameter to describe the Component's custom state.
 
 ## Type parameters
 
@@ -33,7 +35,7 @@ Component Definition
 
 • **name**: *string*
 
-*Defined in [ECS.ts:8](https://github.com/PandawanFr/ent-comp/blob/3d6c7bd/src/ECS.ts#L8)*
+*Defined in [ECS.ts:9](https://github.com/PandawanFr/ent-comp/blob/74eb104/src/ECS.ts#L9)*
 
 Name of the component
 
@@ -43,7 +45,7 @@ ___
 
 • **onAdd**? : *undefined | function*
 
-*Defined in [ECS.ts:22](https://github.com/PandawanFr/ent-comp/blob/3d6c7bd/src/ECS.ts#L22)*
+*Defined in [ECS.ts:23](https://github.com/PandawanFr/ent-comp/blob/74eb104/src/ECS.ts#L23)*
 
 Called when the component is added to an entity.
 
@@ -57,7 +59,7 @@ ___
 
 • **onExternalEvent**? : *undefined | function*
 
-*Defined in [ECS.ts:38](https://github.com/PandawanFr/ent-comp/blob/3d6c7bd/src/ECS.ts#L38)*
+*Defined in [ECS.ts:40](https://github.com/PandawanFr/ent-comp/blob/74eb104/src/ECS.ts#L40)*
 
 Use this for any external events that need to be sent to the component.
 (This is never called by ent-comp).
@@ -68,13 +70,15 @@ Use this for any external events that need to be sent to the component.
 
 **`param`** The component's current state.
 
+**`returns`** Any value you want back from the event handler.
+
 ___
 
 ### `Optional` onRemove
 
 • **onRemove**? : *undefined | function*
 
-*Defined in [ECS.ts:29](https://github.com/PandawanFr/ent-comp/blob/3d6c7bd/src/ECS.ts#L29)*
+*Defined in [ECS.ts:30](https://github.com/PandawanFr/ent-comp/blob/74eb104/src/ECS.ts#L30)*
 
 Called when the component is removed from an entity.
 
@@ -88,7 +92,7 @@ ___
 
 • **order**? : *undefined | number*
 
-*Defined in [ECS.ts:12](https://github.com/PandawanFr/ent-comp/blob/3d6c7bd/src/ECS.ts#L12)*
+*Defined in [ECS.ts:13](https://github.com/PandawanFr/ent-comp/blob/74eb104/src/ECS.ts#L13)*
 
 Order to execute the components in
 
@@ -98,7 +102,7 @@ ___
 
 • **renderSystem**? : *undefined | function*
 
-*Defined in [ECS.ts:52](https://github.com/PandawanFr/ent-comp/blob/3d6c7bd/src/ECS.ts#L52)*
+*Defined in [ECS.ts:54](https://github.com/PandawanFr/ent-comp/blob/74eb104/src/ECS.ts#L54)*
 
 Called every tick to render that component.
 
@@ -112,7 +116,7 @@ ___
 
 • **state**? : *Omit‹T, "__id"›*
 
-*Defined in [ECS.ts:16](https://github.com/PandawanFr/ent-comp/blob/3d6c7bd/src/ECS.ts#L16)*
+*Defined in [ECS.ts:17](https://github.com/PandawanFr/ent-comp/blob/74eb104/src/ECS.ts#L17)*
 
 Default state of the component
 
@@ -122,7 +126,7 @@ ___
 
 • **system**? : *undefined | function*
 
-*Defined in [ECS.ts:45](https://github.com/PandawanFr/ent-comp/blob/3d6c7bd/src/ECS.ts#L45)*
+*Defined in [ECS.ts:47](https://github.com/PandawanFr/ent-comp/blob/74eb104/src/ECS.ts#L47)*
 
 Called every tick to process that component.
 

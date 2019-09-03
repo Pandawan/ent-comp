@@ -1,13 +1,14 @@
 "use strict";
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
-    return {
+    if (o && typeof o.length === "number") return {
         next: function () {
             if (o && i >= o.length) o = void 0;
             return { value: o && o[i++], done: !o };
         }
     };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -49,6 +50,10 @@ var ECS = /** @class */ (function () {
         this._defaultOrder = options && options.defaultOrder ? options.defaultOrder : 99;
     }
     Object.defineProperty(ECS.prototype, "comps", {
+        /**
+         * Alias for `components` property.
+         * @deprecated
+         */
         get: function () {
             console.error(new Error("Alias \"comps\" is ugly and deprecated. Please use \"components\" instead."));
             return this.components;
@@ -58,6 +63,9 @@ var ECS = /** @class */ (function () {
     });
     Object.defineProperty(ECS.prototype, "defaultOrder", {
         // #region Properties
+        /**
+         * The default `order` value of the components.
+         */
         get: function () {
             return this._defaultOrder;
         },

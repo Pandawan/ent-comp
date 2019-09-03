@@ -34,6 +34,6 @@ Component state object with an unknown shape.
 
 *Inherited from [StateWithID](statewithid.md).[__id](statewithid.md#__id)*
 
-*Defined in [ECS.ts:63](https://github.com/PandawanFr/ent-comp/blob/3d6c7bd/src/ECS.ts#L63)*
+*Defined in [ECS.ts:65](https://github.com/PandawanFr/ent-comp/blob/74eb104/src/ECS.ts#L65)*
 
 The id of the entity this state refers to
