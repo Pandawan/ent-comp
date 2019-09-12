@@ -1,6 +1,7 @@
 # ent-comp
 
-A light, *fast* entity-component system in TypeScript, with no dependencies.
+A light, *fast* entity-component system in TypeScript, with no dependencies.  
+(Forked from [andyhall's ent-comp](https://github.com/andyhall/ent-comp)).
 
 ## Overview
 
@@ -150,34 +151,13 @@ By default, all "remove" APIs (anything that deletes an entity or component,
 or removes a component from an entity) defer execution and happen asynchronously.
 This is done since components tend to remove themselves from inside their system functions. Pass `true` as the final argument to such APIs to make them execute immediately.
 
-## Multi-components
+## Note on Multi-Components
 
-This library now supports multi components, where a given entity can have multiple state objects for a given component.
+The original implementation supported multi-components, which provided a way for an entity to hold multiple states for one component type. 
 
-API may change someday, but for now all ECS methods that normally return a state object instead return an array of state objects. Calling `removeComponent` will remove all multi-component instances for that entity, and there's a new `removeMultiComponent(id, name, index, immediately)` API to remove them individually (by their index in the array).
+I removed this from my TypeScript implementation because it overly-complicated the typings required and I did not find them to be particularly useful. If you want this feature back, consider adding an array of objects* inside of your component's state so that each element can represent an "instance" of that multi-component. You can also submit a Pull Request if you find a way to make it work nicely with the type system (without forcing every component method to check for `Array.isArray()`).
 
-In practice it looks like this:
-
-```js
-ecs.createComponent({
-  name: 'buff',
-  multi: true, // this marks the component as multi
-  state: { buffName: '', duration: 100 },
-  system: function(dt, stateLists) {
-    // stateLists is the array of all ent/comp pairs
-    stateLists.forEach(statesArr => {
-      // statesArr is an array of multi components for this entity
-      statesArr.forEach((state, i) => {
-        // update the state of this particular entity's buff
-        state.duration -= dt
-        if (state.duration < 0) {
-          ecs.removeMultiComponent(state.__id, 'buff', i)
-        }
-      })
-    })
-  },
-})
-```
+\* See [Caveat about complex state objects](#Caveat-about-complex-state-objects) for info on using arrays/objects in the component state.
 
 ## Further usage
 
@@ -242,6 +222,10 @@ ecs.addComponent(id, 'foo', { vector3: [1,1,1] })
 
  2. Provide any way of querying which entities have components A and B, but not C, and so on.
  If you need this, I think maintaining your own lists will be faster (and probably easier to use) than anything the library could do automatically.
+ 
+## Things I might add in the future
+
+- Multi-component **systems**. Where one system can require multiple specific components to execute. For example, an enemy system might require a health and attack component to run; instead of using getState on both of these components, it would be nice to get both of them as a map (`states: [{ healthState1, attackState1 }, { healthState2, attackState2 }]`) through the `system()` method.
 
 ## Change list
 
@@ -267,6 +251,6 @@ ecs.addComponent(id, 'foo', { vector3: [1,1,1] })
 
 ----
 
-### Author: [andyhall](https://github.com/andyhall), [Pandawan](https://github.com/PandawanFr)
+### Authors: [andyhall](https://github.com/andyhall), [Pandawan](https://github.com/PandawanFr)
 
 ### License: MIT
