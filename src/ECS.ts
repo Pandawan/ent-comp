@@ -12,6 +12,10 @@ export interface Component<T extends StateWithID> {
    */
   order?: number;
   /**
+   * Supports having multiples states on one entity.
+   */
+  multi?: boolean;
+  /**
    * Default state of the component
    */
   state?: Omit<T, '__id'>;
@@ -57,12 +61,16 @@ export interface Component<T extends StateWithID> {
 /**
  * Component state object with an __id referring to the entity that owns it.
  */
-// TODO: Add generic T support so Components can know what their types are
 export interface StateWithID {
   /**
    * The id of the entity this state refers to
    */
   __id: number;
+
+  /**
+   * The index of this state if multi-component, undefined otherwise.
+   */
+  __index: number | undefined;
 };
 
 /**
@@ -76,9 +84,14 @@ export interface UnknownStateWithID extends StateWithID {
 /**
  * A `getState`-like accessor function bound to a given component name.
  * @param entID The id of the entity to get from.
+ * @param index The index to get from (if multi-component).
  * @returns The state of that entity's component.
  */
-export type StateAccessor<T extends StateWithID> = ((entID: number) => T | undefined);
+export type StateAccessor<T extends StateWithID> = {
+  (entID: number, index: undefined): Array<T> | undefined;
+  (entID: number, index: number): T | undefined;
+  (entID: number, index?: number): T | Array<T> | undefined;
+}
 
 /**
  * A `hasComponent`-like accessor function bound to a given component name.
@@ -99,6 +112,10 @@ interface ComponentRemovalRequest {
    * The name of the component to remove.
    */
   compName: string;
+  /**
+   * The index of the multi-component to remove (all if undefined).
+   */
+  index?: number;
 }
 
 export default class ECS {
@@ -126,7 +143,7 @@ export default class ECS {
   /**
    * Storage for the component states
    */
-  private storage: { [component: string]: Map<number, StateWithID> };
+  private storage: { [component: string]: Map<number, Array<StateWithID>> };
 
   /**
    * List of all systems, sorted by execution order
@@ -144,7 +161,7 @@ export default class ECS {
   private deferredEntityRemovals: number[];
 
   /**
-   * List of all single-components waiting to be removed.
+   * List of all components waiting to be removed.
    */
   private deferredCompRemovals: ComponentRemovalRequest[];
 
@@ -314,6 +331,7 @@ export default class ECS {
     const internalDef: Component<T> = {
       name,
       order: (!componentDefinition.order || isNaN(componentDefinition.order)) ? this.defaultOrder : componentDefinition.order,
+      multi: componentDefinition.multi || false,
       state: componentDefinition.state || {} as any,
       onAdd: componentDefinition.onAdd || undefined,
       onRemove: componentDefinition.onRemove || undefined,
@@ -350,9 +368,13 @@ export default class ECS {
     const componentData = this.storage[componentName];
     if (!componentData) throw new Error(`Unknown component: ${componentName}`);
 
-    for (const [, state] of componentData) {
-      const id = state.__id;
-      this.removeComponent(id, componentName, true);
+    // Remove every component from
+    for (const [, states] of componentData) {
+      for (const state of states) {
+        const id = state.__id;
+        const index = state.__index;
+        this.removeComponent(id, componentName, index, true);
+      }
     }
 
     // Remove componentNames from the systems list
@@ -404,8 +426,18 @@ export default class ECS {
     // Just in case passed-in state object had an __id property
     newState.__id = entityId;
 
-    // Add to dataStore
-    componentData.set(entityId, newState);
+    // Create data store array if not already
+    if (componentData.has(entityId) === false) {
+      componentData.set(entityId, []);
+    }
+
+    const stateArray = componentData.get(entityId);
+    if (stateArray === undefined) throw new Error('State array is undefined but exists in component storage.');
+
+    // Override the index
+    newState.__index = stateArray.length;
+    // Add new state to array in data store
+    stateArray.push(newState);
 
     // Call handler and return
     if (componentDefinition.onAdd) componentDefinition.onAdd(entityId, newState);
@@ -457,6 +489,7 @@ export default class ECS {
    * Removes a component from an entity, deleting any state data.
    * @param entityId The id of the entity to remove from.
    * @param componentName The name of the component to remove.
+   * @param index The index of the multi-component to remove from (remove all if undefined)
    * @param immediately Force immediate removal (instead of deferred).
    *
    * @example
@@ -465,7 +498,7 @@ export default class ECS {
    * ecs.hasComponent(id, 'foo') // false
    * ```
    */
-  public removeComponent (entityId: number, componentName: string, immediately: boolean = false): ECS {
+  public removeComponent (entityId: number, componentName: string, index?: number, immediately: boolean = false): ECS {
     var componentData = this.storage[componentName];
     if (!componentData) throw new Error(`Unknown component: ${componentName}.`);
 
@@ -492,21 +525,46 @@ export default class ECS {
    * Actually remove a component from the given entity.
    * @param entityId The id of the entity to remove the component from.
    * @param componentName The name of the component to remove.
+   * @param index The index of the multi-component to remove from (remove all if undefined)
    */
-  private removeComponentNow (entityId: number, componentName: string): void {
+  private removeComponentNow (entityId: number, componentName: string, index?: number): void {
     const componentDefinition = this.components[componentName];
     const componentData = this.storage[componentName];
     if (!componentData) return;
     if (!componentData.has(entityId)) return; // probably got removed twice during deferral
 
-    // Call onRemove handler
     const states = componentData.get(entityId);
-    if (states && componentDefinition.onRemove) {
-      componentDefinition.onRemove(entityId, states);
-    }
 
-    // Actual removal from data store
-    componentData.delete(entityId);
+    // Something went wrong
+    if (states === undefined) throw new Error('Something went wrong while removing component: No state array found.');
+
+    // If no index, remove all
+    if (index === undefined) {
+      // Call onRemove handler for every state
+      if (componentDefinition.onRemove) {
+        for (const state of states) {
+          componentDefinition.onRemove(entityId, state);
+        }
+      }
+
+      // Actual removal from data store
+      componentData.delete(entityId);
+    }
+    // Otherwise, there is an index
+    else {
+      // Call onRemove handler for specific state at index
+      if (componentDefinition.onRemove) {
+        componentDefinition.onRemove(entityId, states[index]);
+      }
+
+      // Remove element at index
+      states.splice(index, 1);
+
+      // Array is empty, simply remove it entirely
+      if (states.length === 0) {
+        componentData.delete(entityId);
+      }
+    }
   }
 
   // #endregion
@@ -531,18 +589,27 @@ export default class ECS {
    * ecs.getState(id, 'foo').__id // equals id
    * ```
    */
-  public getState (entityId: number, componentName: string): StateWithID | undefined {
+  public getState(entityId: number, componentName: string, index: number): StateWithID | undefined;
+  public getState(entityId: number, componentName: string, index: undefined): Array<StateWithID> | undefined;
+  public getState (entityId: number, componentName: string, index?: number): StateWithID | Array<StateWithID> | undefined {
     const data = this.storage[componentName];
     if (!data) throw new Error(`Unknown component: ${componentName}.`);
 
-    const state = data.get(entityId);
-    return state;
+    const states = data.get(entityId);
+
+    if (index === undefined) {
+      return states;
+    }
+    else {
+      if (states === undefined) return undefined;
+      else return states[index];
+    }
   }
 
   /**
    * Get an array of state objects for every entity with the given component.
-   * Each one will have an `__id` property for the entity id it refers to.
-   * Don't add or remove elements from the returned list!
+   * Each one will have an `__id` property for the entity id it refers to 
+   * and an `__index` property to for the state it refers to (useful for multi-component)
    *
    * @param componentName The name of the component to get the states list from.
    *
@@ -557,7 +624,7 @@ export default class ECS {
   public getStatesList (componentName: string): Array<StateWithID> {
     const data = this.storage[componentName];
     if (!data) throw new Error(`Unknown component: ${componentName}.`);
-    return Array.from(data.values());
+    return Array.from(data.values()).flat(1);
   }
 
   /**
@@ -575,17 +642,23 @@ export default class ECS {
    * })
    * ecs.addComponent(id, 'size')
    * var getSize = ecs.getStateAccessor('size')
-   * getSize(id).val // 0
+   * getSize(id) // [ { val: 0 } ]
+   * getSize(id, index).val // 0
    * ```
    */
   // TODO: Find a way to infer type maybe? Kind of complex since typing is at compile time.
   public getStateAccessor<T extends StateWithID> (componentName: string): StateAccessor<T> { 
     const data = this.storage[componentName];
     if (!data) throw new Error(`Unknown component: ${componentName}.`);
-    return function (entityId: number) {
-      const state = data.get(entityId) as T;
-      return state;
-    };
+
+    return function(entityId: number, index?: number) {
+      const states = data.get(entityId);
+
+      if (states === undefined) return undefined;
+      if (index === undefined) return states;
+      
+      return states[index];
+    } as StateAccessor<T>; // HACK: Have to cast because TS' function overloading doesn't work well with callbacks
   }
 
   /**
@@ -643,7 +716,7 @@ export default class ECS {
   public tick (dt: number): ECS {
     this.runAllDeferredRemovals();
     for (const componentName of this.systems) {
-      const list = Array.from(this.storage[componentName].values());
+      const list = Array.from(this.storage[componentName].values()).flat();
       const component = this.components[componentName];
       if (component.system) {
         component.system(dt, list);
@@ -677,7 +750,7 @@ export default class ECS {
   public render (dt: number): ECS {
     this.runAllDeferredRemovals();
     for (const componentName of this.renderSystems) {
-      const list = Array.from(this.storage[componentName].values());
+      const list = Array.from(this.storage[componentName].values()).flat();
       const component = this.components[componentName];
       if (component.renderSystem) {
         component.renderSystem(dt, list);
@@ -730,7 +803,7 @@ export default class ECS {
     while (this.deferredCompRemovals.length) {
       const removalRequest = this.deferredCompRemovals.pop();
       if (removalRequest === undefined) continue;
-      this.removeComponentNow(removalRequest.id, removalRequest.compName);
+      this.removeComponentNow(removalRequest.id, removalRequest.compName, removalRequest.index);
     }
   }
 
