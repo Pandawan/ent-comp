@@ -40,8 +40,8 @@ Create the ECS, entities, and components thusly:
 
 ```js
 // You might have to import the file directly rather than ent-comp
-import EntComp from './ECS';
-const ecs = new EntComp();
+import EntComp from './ECS'
+const ecs = new EntComp()
 
 // Entities are simply integer IDs:
 var playerID = ecs.createEntity() // 1
@@ -151,13 +151,39 @@ By default, all "remove" APIs (anything that deletes an entity or component,
 or removes a component from an entity) defer execution and happen asynchronously.
 This is done since components tend to remove themselves from inside their system functions. Pass `true` as the final argument to such APIs to make them execute immediately.
 
-## Note on Multi-Components
+## Multi-Components
 
-The original implementation supported multi-components, which provided a way for an entity to hold multiple states for one component type. 
+This library now supports multi components, where a given entity can have 
+multiple state objects for a given component. 
 
-I removed this from my TypeScript implementation because it overly-complicated the typings required and I did not find them to be particularly useful. If you want this feature back, consider adding an array of objects* inside of your component's state so that each element can represent an "instance" of that multi-component. You can also submit a Pull Request if you find a way to make it work nicely with the type system (without forcing every component method to check for `Array.isArray()`).
+API may change someday, but for now all ECS methods that normally 
+return a state object instead return an array of state objects. 
+Calling `removeComponent` will remove all multi-component instances for 
+that entity, and there's a new `removeMultiComponent(id, name, index, immediately)` 
+API to remove them individually (by their index in the array).
 
-\* See [Caveat about complex state objects](#Caveat-about-complex-state-objects) for info on using arrays/objects in the component state.
+In practice it looks like this:
+
+```js
+ecs.createComponent({
+  name: 'buff',
+  multi: true, // this marks the component as multi
+  state: { buffName: '', duration: 100 },
+  system: function(dt, stateLists) {
+    // stateLists is the array of all ent/comp pairs
+    stateLists.forEach(statesArr => {
+      // statesArr is an array of multi components for this entity
+      statesArr.forEach((state, i) => {
+        // update the state of this particular entity's buff
+        state.duration -= dt
+        if (state.duration < 0) {
+          ecs.removeMultiComponent(state.__id, 'buff', i)
+        }
+      })
+    })
+  },
+})
+```
 
 ## Further usage
 
@@ -229,6 +255,8 @@ ecs.addComponent(id, 'foo', { vector3: [1,1,1] })
 
 ## Change list
 
+* 1.4.0
+  * Re-add `multi`-components. Turns out I need them for multi-meshed entities. I tried making them work with TypeScript dynamic typing but it isn't working. (See `src/ECS_2.ts`)
 * 1.3.0
   * Add `sortByOrder` method to sort component arrays using their componentDefinition.order.
   * Add generic T type for component definitions so their methods can return custom state typings.

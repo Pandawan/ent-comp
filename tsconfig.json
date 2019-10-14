@@ -59,6 +59,7 @@
     "src"
   ],
   "exclude": [
-    "test"
+    "test",
+    "src/ECS_2.ts"
   ]
 }

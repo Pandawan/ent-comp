@@ -1,6 +1,6 @@
 {
   "name": "ent-comp",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "A light, fast Entity Component System in TS",
   "main": "dist/ECS.js",
   "types": "dist/ECS.d.ts",

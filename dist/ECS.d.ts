@@ -12,6 +12,10 @@ export interface Component<T extends StateWithID> {
      */
     order?: number;
     /**
+     * Allow entities to have multiple instances of this component
+     */
+    multi?: boolean;
+    /**
      * Default state of the component
      */
     state?: Omit<T, '__id'>;
@@ -35,19 +39,19 @@ export interface Component<T extends StateWithID> {
      * @param state The component's current state.
      * @returns Any value you want back from the event handler.
      */
-    onExternalEvent?: (event: string, id: number, state: T) => any;
+    onExternalEvent?: (event: string, id: number, state: T | Array<T>) => any;
     /**
      * Called every tick to process that component.
      * @param dt Length of one tick in ms.
      * @param states Array of all states of this component type.
      */
-    system?: (dt: number, states: Array<T>) => void;
+    system?: (dt: number, states: Array<T> | Array<Array<T>>) => void;
     /**
      * Called every tick to render that component.
      * @param dt Length of one render tick in ms.
      * @param states Array of all states of this component type.
      */
-    renderSystem?: (dt: number, states: Array<T>) => void;
+    renderSystem?: (dt: number, states: Array<T> | Array<Array<T>>) => void;
 }
 /**
  * Component state object with an __id referring to the entity that owns it.
@@ -70,7 +74,7 @@ export interface UnknownStateWithID extends StateWithID {
  * @param entID The id of the entity to get from.
  * @returns The state of that entity's component.
  */
-export declare type StateAccessor<T extends StateWithID> = ((entID: number) => T | undefined);
+export declare type StateAccessor<T extends StateWithID> = ((entID: number) => T | Array<T> | undefined);
 /**
  * A `hasComponent`-like accessor function bound to a given component name.
  * @param entID the id of the entity to get from.
@@ -118,6 +122,10 @@ export default class ECS {
      * List of all single-components waiting to be removed.
      */
     private deferredCompRemovals;
+    /**
+     * List of all single-components waiting to be removed.
+     */
+    private deferredMultiCompRemovals;
     /**
      * Whether or not a deferral is currently pending.
      */
@@ -278,6 +286,30 @@ export default class ECS {
      */
     private removeComponentNow;
     /**
+       * Removes a particular state instance of a multi-component.
+       * NOTE: This will splice an element out of the multi-component array,
+     * changing the indexes of subsequent elements.
+     * @param entityId The id of the entity to remove from.
+     * @param componentName The name of the component to remove.
+     * @param index The index of the state to remove.
+     * @param immediately Force immediate removal (instead of deferred).
+       *
+     * @example
+       * ```js
+       * ecs.getState(id, 'foo')   // [ state1, state2, state3 ]
+       * ecs.removeMultiComponent(id, 'foo', 1, true)  // true means: immediately
+       * ecs.getState(id, 'foo')   // [ state1, state3 ]
+       * ```
+       */
+    removeMultiComponent(entityId: number, componentName: string, index: number, immediately?: boolean): this;
+    /**
+     * Actually remove one state from a multi component from the given entity.
+     * @param entityId The id of the entity to remove the component from.
+     * @param componentName The name of the component to remove.
+     * @param stateToRemove The state object to remove
+     */
+    private removeMultiComponentNow;
+    /**
      * Get the component state for a given entity.
      * It will automatically be populated with an `__id` property denoting the entity id.
      * @param entID The id of the entity to get from.
@@ -295,7 +327,7 @@ export default class ECS {
      * ecs.getState(id, 'foo').__id // equals id
      * ```
      */
-    getState(entityId: number, componentName: string): StateWithID | undefined;
+    getState(entityId: number, componentName: string): StateWithID | Array<StateWithID> | undefined;
     /**
      * Get an array of state objects for every entity with the given component.
      * Each one will have an `__id` property for the entity id it refers to.
@@ -311,7 +343,7 @@ export default class ECS {
      * //     {__id:7, x:2}  ]
      * ```
     */
-    getStatesList(componentName: string): Array<StateWithID>;
+    getStatesList(componentName: string): Array<StateWithID | Array<StateWithID>>;
     /**
      * Returns a `getState`-like accessor function bound to a given component name.
      * The accessor is much faster than `getState`, so you should create an accessor
@@ -412,4 +444,8 @@ export default class ECS {
      * Component removal, processes a queue of `{ id, compName }`
      */
     private doDeferredComponentRemovals;
+    /**
+     * Multi Component removal, processes a queue of `{ id, compName, state }`
+     */
+    private doDeferredMultiComponentRemovals;
 }

@@ -12,6 +12,10 @@ export interface Component<T extends StateWithID> {
    */
   order?: number;
   /**
+   * Allow entities to have multiple instances of this component
+   */
+  multi?: boolean;
+  /**
    * Default state of the component
    */
   state?: Omit<T, '__id'>;
@@ -37,27 +41,26 @@ export interface Component<T extends StateWithID> {
    * @param state The component's current state.
    * @returns Any value you want back from the event handler.
    */
-  onExternalEvent?: (event: string, id: number, state: T) => any;
+  onExternalEvent?: (event: string, id: number, state: T | Array<T>) => any;
 
   /**
    * Called every tick to process that component.
    * @param dt Length of one tick in ms.
    * @param states Array of all states of this component type.
    */
-  system?: (dt: number, states: Array<T>) => void;
+  system?: (dt: number, states: Array<T> | Array<Array<T>>) => void;
 
   /**
    * Called every tick to render that component.
    * @param dt Length of one render tick in ms.
    * @param states Array of all states of this component type.
    */
-  renderSystem?: (dt: number, states: Array<T>) => void;
+  renderSystem?: (dt: number, states: Array<T> | Array<Array<T>>) => void;
 }
 
 /**
  * Component state object with an __id referring to the entity that owns it.
  */
-// TODO: Add generic T support so Components can know what their types are
 export interface StateWithID {
   /**
    * The id of the entity this state refers to
@@ -78,7 +81,7 @@ export interface UnknownStateWithID extends StateWithID {
  * @param entID The id of the entity to get from.
  * @returns The state of that entity's component.
  */
-export type StateAccessor<T extends StateWithID> = ((entID: number) => T | undefined);
+export type StateAccessor<T extends StateWithID> = ((entID: number) => T | Array<T> | undefined);
 
 /**
  * A `hasComponent`-like accessor function bound to a given component name.
@@ -99,6 +102,25 @@ interface ComponentRemovalRequest {
    * The name of the component to remove.
    */
   compName: string;
+}
+
+
+/**
+ * Object that represents a ComponentRemoval request which has been deferred.
+ */
+interface MultiComponentRemovalRequest {
+  /**
+   * The id of the entity to remove the component from.
+   */
+  id: number;
+  /**
+   * The name of the component to remove.
+   */
+  compName: string;
+  /**
+   * The state of the component to remove.
+   */
+  state: StateWithID | undefined;
 }
 
 export default class ECS {
@@ -126,7 +148,7 @@ export default class ECS {
   /**
    * Storage for the component states
    */
-  private storage: { [component: string]: Map<number, StateWithID> };
+  private storage: { [component: string]: Map<number, StateWithID | Array<StateWithID>> };
 
   /**
    * List of all systems, sorted by execution order
@@ -147,6 +169,11 @@ export default class ECS {
    * List of all single-components waiting to be removed.
    */
   private deferredCompRemovals: ComponentRemovalRequest[];
+
+  /**
+   * List of all single-components waiting to be removed.
+   */
+  private deferredMultiCompRemovals: MultiComponentRemovalRequest[];
 
   /**
    * Whether or not a deferral is currently pending.
@@ -182,6 +209,7 @@ export default class ECS {
 
     this.deferredEntityRemovals = [];
     this.deferredCompRemovals = [];
+    this.deferredMultiCompRemovals = [];
     this.deferralTimeoutPending = false;
 
     this.uid = 1;
@@ -314,6 +342,7 @@ export default class ECS {
     const internalDef: Component<T> = {
       name,
       order: (!componentDefinition.order || isNaN(componentDefinition.order)) ? this.defaultOrder : componentDefinition.order,
+      multi: componentDefinition.multi === true,
       state: componentDefinition.state || {} as any,
       onAdd: componentDefinition.onAdd || undefined,
       onRemove: componentDefinition.onRemove || undefined,
@@ -351,7 +380,7 @@ export default class ECS {
     if (!componentData) throw new Error(`Unknown component: ${componentName}`);
 
     for (const [, state] of componentData) {
-      const id = state.__id;
+      const id = Array.isArray(state) ? state[0].__id : state.__id;
       this.removeComponent(id, componentName, true);
     }
 
@@ -396,7 +425,7 @@ export default class ECS {
     }
     if (pendingRemoval) this.doDeferredComponentRemovals();
 
-    if (componentData.has(entityId)) throw new Error(`Entity ${entityId} already has component: ${componentName}.`);
+    if (componentData.has(entityId) && !componentDefinition.multi) throw new Error(`Entity ${entityId} already has component: ${componentName}.`);
 
     // Create new component state object for this entity
     const newState: StateWithID = Object.assign({}, { __id: entityId }, componentDefinition.state, state);
@@ -404,8 +433,20 @@ export default class ECS {
     // Just in case passed-in state object had an __id property
     newState.__id = entityId;
 
-    // Add to dataStore
-    componentData.set(entityId, newState);
+    // Add to dataStore, for multi components, may already be present
+    if (componentDefinition.multi === true) {
+      // Create array if doesn't already exist
+      if (componentData.has(entityId) === false) {
+        componentData.set(entityId, []);
+      }
+      
+      // Push new state to the array
+      (componentData.get(entityId) as StateWithID[]).push(newState);
+    }
+    else {
+      // Add to dataStore
+      componentData.set(entityId, newState);
+    }
 
     // Call handler and return
     if (componentDefinition.onAdd) componentDefinition.onAdd(entityId, newState);
@@ -466,11 +507,12 @@ export default class ECS {
    * ```
    */
   public removeComponent (entityId: number, componentName: string, immediately: boolean = false): ECS {
-    var componentData = this.storage[componentName];
+    const componentData = this.storage[componentName];
     if (!componentData) throw new Error(`Unknown component: ${componentName}.`);
 
     // If component isn't present, throw 
     if (!componentData.has(entityId)) {
+      // TODO: Original ent-comp fails silently for multi component, why?
       throw new Error(`Entity ${entityId} does not have component: ${componentName} to remove.`);
     }
 
@@ -501,12 +543,94 @@ export default class ECS {
 
     // Call onRemove handler
     const states = componentData.get(entityId);
-    if (states && componentDefinition.onRemove) {
-      componentDefinition.onRemove(entityId, states);
+    if (states !== undefined && componentDefinition.onRemove) {
+      if (componentDefinition.multi && Array.isArray(states)) {
+        for (const state of states) {
+          componentDefinition.onRemove(entityId, state);
+        }
+      } else {
+        componentDefinition.onRemove(entityId, states);
+      }
+    }
+
+    // If multi, kill the states array to hopefully free the objects
+    if (componentDefinition.multi && Array.isArray(states)) {
+      states.length = 0;
     }
 
     // Actual removal from data store
     componentData.delete(entityId);
+  }
+
+  /**
+	 * Removes a particular state instance of a multi-component.
+	 * NOTE: This will splice an element out of the multi-component array, 
+   * changing the indexes of subsequent elements.
+   * @param entityId The id of the entity to remove from.
+   * @param componentName The name of the component to remove.
+   * @param index The index of the state to remove.
+   * @param immediately Force immediate removal (instead of deferred).
+	 * 
+   * @example
+	 * ```js
+	 * ecs.getState(id, 'foo')   // [ state1, state2, state3 ]
+	 * ecs.removeMultiComponent(id, 'foo', 1, true)  // true means: immediately
+	 * ecs.getState(id, 'foo')   // [ state1, state3 ]
+	 * ```
+	 */
+  public removeMultiComponent(entityId: number, componentName: string, index: number, immediately: boolean = false) {
+    const componentDefinition = this.components[componentName];
+    const componentData = this.storage[componentName];
+    if (!componentData) throw new Error(`Unknown component: ${componentName}.`);
+    if (!componentDefinition.multi) throw new Error(`removeMultiComponent called on non-multi component`);
+
+    const statesArray = componentData.get(entityId) as StateWithID[] | undefined;
+    // If component isn't present, or multicomp isn't present at index, throw 
+    if (statesArray === undefined || statesArray[index] === undefined) {
+      throw new Error(`Entity ${entityId} does not have multi-component ${componentName} at index ${index} to remove.`);
+    }
+
+    const stateToRemove = statesArray[index];
+    // Defer or remove
+    if (immediately) {
+      this.removeMultiComponentNow(entityId, componentName, stateToRemove);
+    } else {
+      this.deferredMultiCompRemovals.push({
+        id: entityId,
+        compName: componentName,
+        state: stateToRemove
+      });
+      this.makeDeferralTimeout();
+    }
+
+    return this;
+  }
+
+  /**
+   * Actually remove one state from a multi component from the given entity.
+   * @param entityId The id of the entity to remove the component from.
+   * @param componentName The name of the component to remove.
+   * @param stateToRemove The state object to remove
+   */
+  private removeMultiComponentNow (entityId: number, componentName: string, stateToRemove: StateWithID): void {
+    const componentDefinition = this.components[componentName];
+    const componentData = this.storage[componentName];
+    if (!componentData) return;
+    if (!componentData.has(entityId)) return; // probably got removed twice during deferral
+
+    const statesArray = componentData.get(entityId) as StateWithID[];
+    const index = statesArray.indexOf(stateToRemove);
+    if (index < 0) return; // State obj not found in list
+    if (componentDefinition.onRemove) {
+      componentDefinition.onRemove(entityId, stateToRemove);
+    }
+    statesArray.splice(index, 1); // Remove object from array
+
+
+    // If this leaves the states list empty, remove the whole component
+    if (statesArray.length === 0) {
+      this.removeComponentNow(entityId, componentName);
+    }
   }
 
   // #endregion
@@ -531,12 +655,10 @@ export default class ECS {
    * ecs.getState(id, 'foo').__id // equals id
    * ```
    */
-  public getState (entityId: number, componentName: string): StateWithID | undefined {
+  public getState (entityId: number, componentName: string): StateWithID | Array<StateWithID> | undefined {
     const data = this.storage[componentName];
     if (!data) throw new Error(`Unknown component: ${componentName}.`);
-
-    const state = data.get(entityId);
-    return state;
+    return data.get(entityId);
   }
 
   /**
@@ -554,7 +676,7 @@ export default class ECS {
    * //     {__id:7, x:2}  ]
    * ```
   */
-  public getStatesList (componentName: string): Array<StateWithID> {
+  public getStatesList (componentName: string): Array<StateWithID | Array<StateWithID>> {
     const data = this.storage[componentName];
     if (!data) throw new Error(`Unknown component: ${componentName}.`);
     return Array.from(data.values());
@@ -583,8 +705,7 @@ export default class ECS {
     const data = this.storage[componentName];
     if (!data) throw new Error(`Unknown component: ${componentName}.`);
     return function (entityId: number) {
-      const state = data.get(entityId) as T;
-      return state;
+      return data.get(entityId) as T | Array<T> | undefined;
     };
   }
 
@@ -709,6 +830,7 @@ export default class ECS {
    */
   private runAllDeferredRemovals (): void {
     this.doDeferredComponentRemovals();
+    this.doDeferredMultiComponentRemovals();
     this.doDeferredEntityRemovals();
   }
 
@@ -731,6 +853,21 @@ export default class ECS {
       const removalRequest = this.deferredCompRemovals.pop();
       if (removalRequest === undefined) continue;
       this.removeComponentNow(removalRequest.id, removalRequest.compName);
+    }
+  }
+
+
+  /**
+   * Multi Component removal, processes a queue of `{ id, compName, state }`
+   */
+  private doDeferredMultiComponentRemovals (): void {
+    while (this.deferredCompRemovals.length) {
+      const removalRequest = this.deferredMultiCompRemovals.pop();
+      if (removalRequest === undefined) continue;
+      if (removalRequest.state) {
+        this.removeMultiComponentNow(removalRequest.id, removalRequest.compName, removalRequest.state);
+      }
+      removalRequest.state = undefined;
     }
   }
 
